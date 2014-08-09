@@ -1,6 +1,8 @@
-HTMLElement.prototype.offset = function() {
-    var top=0, left=0;
-    elem = this;
+/// <reference path="defenitions/predefined.d.ts" />
+
+var getOffset = function(elem) {
+        var top=0, left=0;
+
     while(elem) {
         top = top + parseFloat(elem.offsetTop);
         left = left + parseFloat(elem.offsetLeft);
@@ -11,145 +13,241 @@ HTMLElement.prototype.offset = function() {
 };
 
 // Create the canvas
-var canvas = document.createElement("canvas");
-var ctx = canvas.getContext("2d");
+// TODO canvas dt
+var canvas = document.createElement('canvas');
+var ctx = canvas.getContext('2d');
 canvas.width = 512;
 canvas.height = 480;
 document.body.appendChild(canvas);
 
-// Background image
-var bgReady = false;
-var bgImage = new Image();
-bgImage.onload = function () {
-	bgReady = true;
-};
-bgImage.src = "images/background.png";
 
-// Hero image
-var heroReady = false;
-var heroReady2 = false;
-var heroImage = new Image();
-heroImage.onload = function () {
-	heroReady = true;
-};
-heroImage.src = "images/hero.png";
+enum Direction {left, right, up, down, all};
 
-var heroImage2 = new Image();
+class ObjectPicture {
+    source: Image;
+    isReady: boolean = false;
+    direction: Direction;
+    constructor(src: string, direction: Direction = Direction.all) {
+        var img:Image = new Image();
+        img.src = src;
+        var self = this;
+        img.onload = function() {
+            self.isReady = true;
+        };
+        this.source = img;
+        this.direction = direction;
+    }
+}
 
-heroImage2.onload = function() {
-    heroReady2 = true;
-};
-heroImage2.src = "images/hero2.png";
+interface MapObjectParams {
+    x: number;
+    y: number;
+    name: string;
+    pictures: Array<ObjectPicture>;
+    pointer?: MapPointer;
+}
 
-// Monster image
-var monsterReady = false;
-var targetImg = new Image();
-targetImg.onload = function () {
-	monsterReady = true;
-};
-targetImg.src = "images/target.png";
+var pointers: Array<MapPointer> = [];
 
-// Game objects
-var hero = {
-	speed: 128 // movement in pixels per second
-};
-var monster = {};
+class MapPointer {
+    private visibilityTime: number = 1000;
+    private timerId: number = 0;
+    private parent: MovingObject;
 
-// Handle keyboard controls
-var keysDown = {};
+    x: number;
+    y: number;
 
-var gameover = false;
+    heroX: number;
+    heroY: number;
 
-addEventListener("keydown", function (e) {
+    visible: boolean = false;
+    // TODO mv to hero
+    active: boolean = false;
+
+    constructor(parent: MovingObject) {
+        this.parent = parent;
+        pointers.push(this);
+    }
+
+    reset():void {
+        if (this.timerId) {
+            clearTimeout(this.timerId);
+            this.timerId = 0;
+            this.active = false;
+            this.visible = false;
+        }
+    }
+
+    set(x, y) {
+        var self = this;
+
+        this.visible = true;
+        this.active = true;
+
+        this.heroX = this.parent.x;
+        this.heroY = this.parent.y;
+        this.x = x;
+        this.y = y;
+        this.timerId = setTimeout(function() {
+            self.visible = false;
+        }, this.visibilityTime);
+    }
+}
+
+class MapObject {
+    x: number;
+    y: number;
+    name: string;
+    pictures: Array<ObjectPicture>;
+    pictureTimer: number = 0;
+    pictureTime: number = 400;
+    pictureCounter: number;
+
+    constructor(params: MapObjectParams) {
+        this.x = params.x;
+        this.y = params.y;
+        this.name = params.name;
+        this.pictures = params.pictures;
+    }
+
+    set(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+    // FIXME
+    get picture():any {
+        return this.pictures[0].source;
+    }
+}
+
+class MovingObject extends MapObject {
+    speed: number = 128;
+    pointer: MapPointer;
+
+    constructor(params: MapObjectParams) {
+        super(params);
+        movingObjects.push(this);
+        this.pointer = params.pointer;
+    }
+
+    onTick(timeDelta: number):void {
+        var self = this;
+        var moving = false;
+
+        if (38 in keysDown || 87 in keysDown) { //  up
+            moving = true;
+            hero.y -= hero.speed * timeDelta;
+        }
+
+        if (40 in keysDown || 83 in keysDown) { // down
+            moving = true;
+            hero.y += hero.speed * timeDelta;
+        }
+
+        if (37 in keysDown || 65 in keysDown) { // left
+            moving = true;
+            hero.x -= hero.speed * timeDelta;
+        }
+
+        if (39 in keysDown || 68 in keysDown) { // right
+            moving = true;
+            hero.x += hero.speed * timeDelta;
+        }
+
+        console.log(this);
+        if (this.pointer.active) {
+            // если уже двигаешь клавишами, то поинтер сбросить
+            if (moving) {
+                this.pointer.reset();
+            } else if (Math.round(this.pointer.x) === Math.round(this.x)
+                    && Math.round(this.pointer.y) === Math.round(this.y)) {
+                this.pointer.reset();
+            } else {
+                var deltaX = this.pointer.x - this.pointer.heroX;
+                var deltaY = this.pointer.y - this.pointer.heroY;
+                console.log(this, this.pointer);
+                console.log(deltaX, deltaY);
+                this.x += deltaX / this.speed;
+                this.y += deltaY / this.speed;
+            }
+
+            moving = true;
+        }
+
+        if (moving) {
+            if (!this.pictureTimer) {
+                this.pictureTimer = setTimeout(function() {
+                    self.pictureCounter++;
+                }, this.pictureTime);
+            }
+        } else {
+            if (this.pictureTimer) {
+                clearTimeout(this.pictureTimer);
+                this.pictureTimer = 0;
+            }
+        }
+    }
+}
+
+var target = new MapObject({
+    x: 32 + (Math.random() * (canvas.width - 64)),
+    y: 32 + (Math.random() * (canvas.height - 64)),
+    name: 'target',
+    pictures: [new ObjectPicture('images/target.png')]
+});
+
+var background = new MapObject({
+    x: 0,
+    y: 0,
+    name: 'background',
+    pictures: [new ObjectPicture('images/background.png')]
+});
+
+var movingObjects: Array<MovingObject> = [];
+
+var hero = new MovingObject({
+    x: 0,
+    y: 0,
+    name: 'hero',
+    pictures: [new ObjectPicture('images/hero.png'), new ObjectPicture('images/hero2.png')],
+    pointer: new MapPointer(this)
+
+});
+
+var keysDown: Object = Object.create(null);
+addEventListener('keydown', function (e) {
 	keysDown[e.keyCode] = true;
 }, false);
 
-
-addEventListener("keyup", function (e) {
+addEventListener('keyup', function (e) {
 	delete keysDown[e.keyCode];
 }, false);
 
-var currentPointer = null;
-canvas.addEventListener("click", function(e) {
-    if (currentPointer) {
-        clearTimeout(currentPointer.timerId);
-        currentPointer = null;
-    }
-
-    currentPointer = {}
-    currentPointer.x = e.pageX - canvas.offset().left;
-    currentPointer.y = e.pageY - canvas.offset().top;
-    currentPointer.timerId = setTimeout(function() {
-        currentPointer = null;
-    }, 1000);
+canvas.addEventListener('click', function(e) {
+    hero.pointer.reset();
+    hero.pointer.set(e.pageX - getOffset(canvas).left, e.pageY - getOffset(canvas).top);
 });
 
-// Reset the game when the player catches a monster
-var reset = function () {
-	hero.x = canvas.width / 2;
-	hero.y = canvas.height / 2;
+var gameover:boolean = false;
 
-	// Throw the monster somewhere on the screen randomly
-	monster.x = 32 + (Math.random() * (canvas.width - 64));
-	monster.y = 32 + (Math.random() * (canvas.height - 64));
-};
+function reset():void {
+    hero.set(canvas.width / 2, canvas.height / 2);
+    target.set(32 + (Math.random() * (canvas.width - 64)),
+        32 + (Math.random() * (canvas.height - 64)));
+}
 
-var heroStep = true;
-var moving = false;
-var timerId = null;
+function update(timeDelta: number):void {
+    movingObjects.forEach(function(obj: MovingObject) {
+        obj.onTick(timeDelta);
+    });
 
-var nextStep = function() {
-    heroStep = !heroStep;
-    timerId = setTimeout(nextStep, 300);
-    return timerId;
-};
-
-// Update game objects
-var update = function (modifier) {
-    moving = false;
-        if (38 in keysDown) { //  up
-            moving = true;
-            hero.y -= hero.speed * modifier;
-        }
-        if (40 in keysDown) { // down
-            moving = true;
-            hero.y += hero.speed * modifier;
-        }
-        if (37 in keysDown) { // left
-            moving = true;
-            hero.x -= hero.speed * modifier;
-        }
-        if (39 in keysDown) { // right
-            moving = true;
-            hero.x += hero.speed * modifier;
-        }
-
-    if (currentPointer) {
-        if (moving) {
-            currentPointer = null;
-        } else {
-        }
-        moving = true;
-    }
-
-    if (moving) {
-        if (!timerId) {
-            timerId = nextStep();
-        }
-    } else {
-        if (timerId) {
-            clearTimeout(timerId);
-            timerId = null;
-        }
-    }
-
-	// Are they touching?
-	if (
-		hero.x <= (monster.x + 32)
-		&& monster.x <= (hero.x + 32)
-		&& hero.y <= (monster.y + 32)
-		&& monster.y <= (hero.y + 32)
-	) {
+    if (
+        hero.x <= (target.x + 32)
+        && target.x <= (hero.x + 32)
+        && hero.y <= (target.y + 32)
+        && target.y <= (hero.y + 32)
+    ) {
         gameover = true;
         ctx.fillStyle = "rgb(250, 250, 250)";
         ctx.font = "24px Helvetica";
@@ -157,58 +255,47 @@ var update = function (modifier) {
         ctx.textBaseline = "top";
         ctx.fillText("WINNER IS YOU", 32, 32);
         requestAnimationFrame(main);
-	}
-};
+    }
+}
 
-
-// Draw everything
-var render = function () {
+function render():void {
     if (gameover)
         return;
 
-	if (bgReady) {
-		ctx.drawImage(bgImage, 0, 0);
-	}
+    ctx.drawImage(background.picture, background.x, background.y);
+    ctx.drawImage(hero.picture, hero.x, hero.y);
+    ctx.drawImage(target.picture, target.x, target.y);
 
-	if (heroReady && heroReady2) {
-		ctx.drawImage(heroStep ? heroImage : heroImage2, hero.x, hero.y);
-	}
-
-	if (monsterReady) {
-		ctx.drawImage(targetImg, monster.x, monster.y);
-	}
-
-    if (currentPointer) {
-        // TODO зачем beginPath?
+    if (hero.pointer.visible) {
         ctx.beginPath();
-        ctx.rect(currentPointer.x, currentPointer.y, 10, 10);
+        ctx.strokeStyle="blue";
+        ctx.rect(hero.pointer.x - 5, hero.pointer.y - 5, 10, 10);
         ctx.stroke();
     }
+}
 
-};
-
-// The main game loop
-var main = function () {
+function main():void {
     if (gameover)
         return;
 
-	var now = Date.now();
-	var delta = now - then;
+    var now:number = Date.now();
+    var delta:number = now - then;
 
-	update(delta / 1000);
-	render();
+    update(delta / 1000);
+    render();
 
-	then = now;
+    then = now;
 
-	// Request to do this again ASAP
-	requestAnimationFrame(main);
-};
-
-// Cross-browser support for requestAnimationFrame
-var w = window;
-window.requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+    // Request to do this again ASAP
+    requestAnimationFrame(main);
+}
 
 // Let's play this game!
-var then = Date.now();
+var then:number = Date.now();
+
 reset();
-main();
+
+// FIXME
+setTimeout(function() {
+    main();
+}, 1000);
