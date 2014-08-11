@@ -44,7 +44,6 @@ interface MapObjectParams {
     y: number;
     name: string;
     pictures: Array<ObjectPicture>;
-    pointer?: MapPointer;
 }
 
 var pointers: Array<MapPointer> = [];
@@ -52,7 +51,7 @@ var pointers: Array<MapPointer> = [];
 class MapPointer {
     private visibilityTime: number = 1000;
     private timerId: number = 0;
-    private parent: MovingObject;
+    private _parent: MovingObject;
 
     x: number;
     y: number;
@@ -64,8 +63,8 @@ class MapPointer {
     // TODO mv to hero
     active: boolean = false;
 
-    constructor(parent: MovingObject) {
-        this.parent = parent;
+    constructor(_parent: MovingObject) {
+        this._parent = _parent;
         pointers.push(this);
     }
 
@@ -78,14 +77,14 @@ class MapPointer {
         }
     }
 
-    set(x, y) {
+    set(x:number, y:number) {
         var self = this;
 
         this.visible = true;
         this.active = true;
 
-        this.heroX = this.parent.x;
-        this.heroY = this.parent.y;
+        this.heroX = this._parent.x;
+        this.heroY = this._parent.y;
         this.x = x;
         this.y = y;
         this.timerId = setTimeout(function() {
@@ -101,7 +100,7 @@ class MapObject {
     pictures: Array<ObjectPicture>;
     pictureTimer: number = 0;
     pictureTime: number = 400;
-    pictureCounter: number;
+    pictureCounter: number = 1;
 
     constructor(params: MapObjectParams) {
         this.x = params.x;
@@ -117,7 +116,12 @@ class MapObject {
 
     // FIXME
     get picture():any {
-        return this.pictures[0].source;
+        return this.pictures[this.pictureCounter % this.pictures.length];
+    }
+
+    draw():void {
+        if (this.picture.isReady)
+            ctx.drawImage(this.picture.source, this.x, this.y);
     }
 }
 
@@ -128,34 +132,34 @@ class MovingObject extends MapObject {
     constructor(params: MapObjectParams) {
         super(params);
         movingObjects.push(this);
-        this.pointer = params.pointer;
+        this.pointer = new MapPointer(this);
     }
 
+    // TODO
     onTick(timeDelta: number):void {
         var self = this;
         var moving = false;
 
         if (38 in keysDown || 87 in keysDown) { //  up
             moving = true;
-            hero.y -= hero.speed * timeDelta;
+            this.y -= this.speed * timeDelta;
         }
 
         if (40 in keysDown || 83 in keysDown) { // down
             moving = true;
-            hero.y += hero.speed * timeDelta;
+            this.y += this.speed * timeDelta;
         }
 
         if (37 in keysDown || 65 in keysDown) { // left
             moving = true;
-            hero.x -= hero.speed * timeDelta;
+            this.x -= this.speed * timeDelta;
         }
 
         if (39 in keysDown || 68 in keysDown) { // right
             moving = true;
-            hero.x += hero.speed * timeDelta;
+            this.x += this.speed * timeDelta;
         }
 
-        console.log(this);
         if (this.pointer.active) {
             // если уже двигаешь клавишами, то поинтер сбросить
             if (moving) {
@@ -166,8 +170,7 @@ class MovingObject extends MapObject {
             } else {
                 var deltaX = this.pointer.x - this.pointer.heroX;
                 var deltaY = this.pointer.y - this.pointer.heroY;
-                console.log(this, this.pointer);
-                console.log(deltaX, deltaY);
+                //console.log(this.pointer.x, this.pointer.heroX);
                 this.x += deltaX / this.speed;
                 this.y += deltaY / this.speed;
             }
@@ -175,17 +178,32 @@ class MovingObject extends MapObject {
             moving = true;
         }
 
+        var pictureTimerFn = function() {
+            self.pictureCounter++;
+            self.pictureTimer = setTimeout(pictureTimerFn, self.pictureTime);
+        }
+
         if (moving) {
             if (!this.pictureTimer) {
-                this.pictureTimer = setTimeout(function() {
-                    self.pictureCounter++;
-                }, this.pictureTime);
+                this.pictureTimer = setTimeout(pictureTimerFn, this.pictureTime);
             }
         } else {
             if (this.pictureTimer) {
                 clearTimeout(this.pictureTimer);
                 this.pictureTimer = 0;
             }
+        }
+    }
+
+    draw() {
+        if (this.picture.isReady)
+            ctx.drawImage(this.picture.source, this.x, this.y);
+
+        if (this.pointer && this.pointer.visible) {
+            ctx.beginPath();
+            ctx.strokeStyle="blue";
+            ctx.rect(this.pointer.x - 5, this.pointer.y - 5, 10, 10);
+            ctx.stroke();
         }
     }
 }
@@ -210,10 +228,10 @@ var hero = new MovingObject({
     x: 0,
     y: 0,
     name: 'hero',
-    pictures: [new ObjectPicture('images/hero.png'), new ObjectPicture('images/hero2.png')],
-    pointer: new MapPointer(this)
+    pictures: [new ObjectPicture('images/hero.png'), new ObjectPicture('images/hero2.png')]
 
 });
+console.log(123);
 
 var keysDown: Object = Object.create(null);
 addEventListener('keydown', function (e) {
@@ -262,16 +280,9 @@ function render():void {
     if (gameover)
         return;
 
-    ctx.drawImage(background.picture, background.x, background.y);
-    ctx.drawImage(hero.picture, hero.x, hero.y);
-    ctx.drawImage(target.picture, target.x, target.y);
-
-    if (hero.pointer.visible) {
-        ctx.beginPath();
-        ctx.strokeStyle="blue";
-        ctx.rect(hero.pointer.x - 5, hero.pointer.y - 5, 10, 10);
-        ctx.stroke();
-    }
+    background.draw();
+    hero.draw();
+    target.draw();
 }
 
 function main():void {
@@ -296,6 +307,4 @@ var then:number = Date.now();
 reset();
 
 // FIXME
-setTimeout(function() {
-    main();
-}, 1000);
+main();
