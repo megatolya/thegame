@@ -1,15 +1,20 @@
 /// <reference path="defenitions/predefined.d.ts" />
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var getOffset = function (elem) {
+    var top = 0, left = 0;
 
-var getOffset = function(elem) {
-        var top=0, left=0;
-
-    while(elem) {
+    while (elem) {
         top = top + parseFloat(elem.offsetTop);
         left = left + parseFloat(elem.offsetLeft);
         elem = elem.offsetParent;
     }
 
-    return {top: Math.round(top), left: Math.round(left)}
+    return { top: Math.round(top), left: Math.round(left) };
 };
 
 // Create the canvas
@@ -20,64 +25,54 @@ canvas.width = 512;
 canvas.height = 480;
 document.body.appendChild(canvas);
 
+var Direction;
+(function (Direction) {
+    Direction[Direction["left"] = 0] = "left";
+    Direction[Direction["right"] = 1] = "right";
+    Direction[Direction["up"] = 2] = "up";
+    Direction[Direction["down"] = 3] = "down";
+    Direction[Direction["all"] = 4] = "all";
+})(Direction || (Direction = {}));
+;
 
-enum Direction {left, right, up, down, all};
-
-class Picture {
-    source;
-    isReady: boolean = false;
-    direction: Direction;
-    constructor(src: string, direction: Direction = Direction.all) {
+var Picture = (function () {
+    function Picture(src, direction) {
+        if (typeof direction === "undefined") { direction = 4 /* all */; }
+        this.isReady = false;
         var img = new Image();
         img.src = src;
         var self = this;
-        img.onload = function() {
+        img.onload = function () {
             self.isReady = true;
         };
         this.source = img;
         this.direction = direction;
     }
-}
+    return Picture;
+})();
 
-interface MapObjectParams {
-    x: number;
-    y: number;
-    name: string;
-    pictures: Array<Picture>;
-}
+var pointers = [];
 
-var pointers: Array<MapPointer> = [];
-
-class MapPointer {
-    private visibilityTime: number = 1000;
-    private timerId: number = 0;
-    private _parent: MovingObject;
-
-    x: number = 0;
-    y: number = 0;
-
-    heroX: number;
-    heroY: number;
-
-    visible: boolean = false;
-    // TODO mv to hero
-    active: boolean = false;
-
-    constructor(_parent: MovingObject) {
+var MapPointer = (function () {
+    function MapPointer(_parent) {
+        this.visibilityTime = 1000;
+        this.timerId = 0;
+        this.visible = false;
+        // TODO mv to hero
+        this.active = false;
         this._parent = _parent;
         pointers.push(this);
     }
-
-    reset():void {
+    MapPointer.prototype.reset = function () {
         if (this.timerId) {
             clearTimeout(this.timerId);
             this.timerId = 0;
             this.active = false;
             this.visible = false;
         }
-    }
+    };
 
-    set(x:number, y:number) {
+    MapPointer.prototype.set = function (x, y) {
         var self = this;
 
         this.visible = true;
@@ -87,90 +82,90 @@ class MapPointer {
         this.heroY = this._parent.y;
         this.x = x;
         this.y = y;
-        this.timerId = setTimeout(function() {
+        this.timerId = setTimeout(function () {
             self.visible = false;
         }, this.visibilityTime);
-    }
-}
+    };
+    return MapPointer;
+})();
 
-class MapObject {
-    x: number;
-    y: number;
-    name: string;
-    pictures: Array<Picture>;
-    pictureTimer: number = 0;
-    pictureTime: number = 400;
-    pictureCounter: number = 1;
-
-    constructor(params: MapObjectParams) {
+var MapObject = (function () {
+    function MapObject(params) {
+        this.pictureTimer = 0;
+        this.pictureTime = 400;
+        this.pictureCounter = 1;
         this.x = params.x;
         this.y = params.y;
         this.name = params.name;
         this.pictures = params.pictures;
     }
-
-    set(x: number, y: number) {
+    MapObject.prototype.set = function (x, y) {
         this.x = x;
         this.y = y;
-    }
+    };
 
-    get picture():Picture {
-        return this.pictures[this.pictureCounter % this.pictures.length];
-    }
+    Object.defineProperty(MapObject.prototype, "picture", {
+        get: function () {
+            return this.pictures[this.pictureCounter % this.pictures.length];
+        },
+        enumerable: true,
+        configurable: true
+    });
 
-    draw():void {
+    MapObject.prototype.draw = function () {
         if (this.picture.isReady)
             ctx.drawImage(this.picture.source, this.x, this.y);
-    }
-}
+    };
+    return MapObject;
+})();
 
-class MovingObject extends MapObject {
-    speed: number = 128;
-    pointer: MapPointer;
-
-    constructor(params: MapObjectParams) {
-        super(params);
+var MovingObject = (function (_super) {
+    __extends(MovingObject, _super);
+    function MovingObject(params) {
+        _super.call(this, params);
+        this.speed = 128;
         movingObjects.push(this);
         this.pointer = new MapPointer(this);
     }
-
     // TODO
-    onTick(timeDelta: number):void {
+    MovingObject.prototype.onTick = function (timeDelta) {
         var self = this;
         var moving = false;
 
-        if (38 in keysDown || 87 in keysDown) { //  up
+        if (38 in keysDown || 87 in keysDown) {
             moving = true;
             this.y -= this.speed * timeDelta;
         }
 
-        if (40 in keysDown || 83 in keysDown) { // down
+        if (40 in keysDown || 83 in keysDown) {
             moving = true;
             this.y += this.speed * timeDelta;
         }
 
-        if (37 in keysDown || 65 in keysDown) { // left
+        if (37 in keysDown || 65 in keysDown) {
             moving = true;
             this.x -= this.speed * timeDelta;
         }
 
-        if (39 in keysDown || 68 in keysDown) { // right
+        if (39 in keysDown || 68 in keysDown) {
             moving = true;
             this.x += this.speed * timeDelta;
         }
 
+        console.log(this.pointer.x, this.x);
+        console.log(this.pointer.y, this.y);
         if (this.pointer.active) {
             // если уже двигаешь клавишами, то поинтер сбросить
             if (moving) {
                 this.pointer.reset();
-            } else if (Math.abs(this.pointer.x - this.x) < 1 && Math.abs(this.pointer.y - this.y) < 1) {
+            } else if (Math.round(this.pointer.x) === Math.round(this.x) && Math.round(this.pointer.y) === Math.round(this.y)) {
                 this.pointer.reset();
             } else {
-                var deltaX:number = this.pointer.x - this.pointer.heroX;
-                var deltaY:number = this.pointer.y - this.pointer.heroY;
-                var maxSpeed:number = this.speed * timeDelta;
+                var deltaX = this.pointer.x - this.pointer.heroX;
+                var deltaY = this.pointer.y - this.pointer.heroY;
+                var maxSpeed = this.speed * timeDelta;
 
-                var deltaSum:number = Math.abs(deltaX) + Math.abs(deltaY);
+                var deltaSum = Math.abs(deltaX) + Math.abs(deltaY);
                 this.x += deltaX * this.speed * timeDelta / deltaSum;
                 this.y += deltaY * this.speed * timeDelta / deltaSum;
             }
@@ -178,10 +173,10 @@ class MovingObject extends MapObject {
             moving = true;
         }
 
-        var pictureTimerFn = function() {
+        var pictureTimerFn = function () {
             self.pictureCounter++;
             self.pictureTimer = setTimeout(pictureTimerFn, self.pictureTime);
-        }
+        };
 
         if (moving) {
             if (!this.pictureTimer) {
@@ -193,20 +188,21 @@ class MovingObject extends MapObject {
                 this.pictureTimer = 0;
             }
         }
-    }
+    };
 
-    draw() {
+    MovingObject.prototype.draw = function () {
         if (this.picture.isReady)
             ctx.drawImage(this.picture.source, this.x, this.y);
 
         if (this.pointer && this.pointer.visible) {
             ctx.beginPath();
-            ctx.strokeStyle="blue";
+            ctx.strokeStyle = "blue";
             ctx.rect(this.pointer.x - 5, this.pointer.y - 5, 10, 10);
             ctx.stroke();
         }
-    }
-}
+    };
+    return MovingObject;
+})(MapObject);
 
 var target = new MapObject({
     x: 32 + (Math.random() * (canvas.width - 64)),
@@ -222,50 +218,43 @@ var background = new MapObject({
     pictures: [new Picture('images/background.png')]
 });
 
-var movingObjects: Array<MovingObject> = [];
+var movingObjects = [];
 
 var hero = new MovingObject({
     x: 0,
     y: 0,
     name: 'hero',
     pictures: [new Picture('images/hero.png'), new Picture('images/hero2.png')]
-
 });
 console.log(123);
 
-var keysDown: Object = Object.create(null);
+var keysDown = Object.create(null);
 addEventListener('keydown', function (e) {
-	keysDown[e.keyCode] = true;
+    keysDown[e.keyCode] = true;
 }, false);
 
 addEventListener('keyup', function (e) {
-	delete keysDown[e.keyCode];
+    delete keysDown[e.keyCode];
 }, false);
 
-canvas.addEventListener('click', function(e) {
+canvas.addEventListener('click', function (e) {
     hero.pointer.reset();
     hero.pointer.set(e.pageX - getOffset(canvas).left, e.pageY - getOffset(canvas).top);
 });
 
-var gameover:boolean = false;
+var gameover = false;
 
-function reset():void {
+function reset() {
     hero.set(canvas.width / 2, canvas.height / 2);
-    target.set(32 + (Math.random() * (canvas.width - 64)),
-        32 + (Math.random() * (canvas.height - 64)));
+    target.set(32 + (Math.random() * (canvas.width - 64)), 32 + (Math.random() * (canvas.height - 64)));
 }
 
-function update(timeDelta: number):void {
-    movingObjects.forEach(function(obj: MovingObject) {
+function update(timeDelta) {
+    movingObjects.forEach(function (obj) {
         obj.onTick(timeDelta);
     });
 
-    if (
-        hero.x <= (target.x + 32)
-        && target.x <= (hero.x + 32)
-        && hero.y <= (target.y + 32)
-        && target.y <= (hero.y + 32)
-    ) {
+    if (hero.x <= (target.x + 32) && target.x <= (hero.x + 32) && hero.y <= (target.y + 32) && target.y <= (hero.y + 32)) {
         gameover = true;
         ctx.fillStyle = "rgb(250, 250, 250)";
         ctx.font = "24px Helvetica";
@@ -276,7 +265,7 @@ function update(timeDelta: number):void {
     }
 }
 
-function render():void {
+function render() {
     if (gameover)
         return;
 
@@ -285,12 +274,12 @@ function render():void {
     target.draw();
 }
 
-function main():void {
+function main() {
     if (gameover)
         return;
 
-    var now:number = Date.now();
-    var delta:number = now - then;
+    var now = Date.now();
+    var delta = now - then;
 
     update(delta / 1000);
     render();
@@ -302,7 +291,7 @@ function main():void {
 }
 
 // Let's play this game!
-var then:number = Date.now();
+var then = Date.now();
 
 reset();
 
