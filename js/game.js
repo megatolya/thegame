@@ -39,11 +39,26 @@ class Picture {
     }
 }
 
+interface IMapObject {
+    x: number;
+    y: number;
+    pictures: Array<Picture>;
+    pictureTimer: number;
+    picturesTimeout: number;
+    pictureCounter: number;
+    picture:Picture;
+
+    blocking: boolean;
+
+    set(x: number, y: number):void;
+    draw():void;
+}
+
 interface MapObjectParams {
     x: number;
     y: number;
-    name: string;
     pictures: Array<Picture>;
+    blocking: boolean;
 }
 
 var pointers: Array<MapPointer> = [];
@@ -77,7 +92,7 @@ class MapPointer {
         }
     }
 
-    set(x:number, y:number) {
+    set(x:number, y:number):void {
         var self = this;
 
         this.visible = true;
@@ -93,23 +108,23 @@ class MapPointer {
     }
 }
 
-class MapObject {
+class MapObject implements IMapObject {
     x: number;
     y: number;
-    name: string;
     pictures: Array<Picture>;
     pictureTimer: number = 0;
-    pictureTime: number = 400;
+    picturesTimeout: number = 400;
     pictureCounter: number = 1;
+
+    blocking: boolean;
 
     constructor(params: MapObjectParams) {
         this.x = params.x;
         this.y = params.y;
-        this.name = params.name;
         this.pictures = params.pictures;
     }
 
-    set(x: number, y: number) {
+    set(x: number, y: number):void {
         this.x = x;
         this.y = y;
     }
@@ -163,12 +178,11 @@ class MovingObject extends MapObject {
             // если уже двигаешь клавишами, то поинтер сбросить
             if (moving) {
                 this.pointer.reset();
-            } else if (Math.abs(this.pointer.x - this.x) < 1 && Math.abs(this.pointer.y - this.y) < 1) {
+            } else if (Math.abs(this.pointer.x - this.x) < 2 && Math.abs(this.pointer.y - this.y) < 2) {
                 this.pointer.reset();
             } else {
                 var deltaX:number = this.pointer.x - this.pointer.heroX;
                 var deltaY:number = this.pointer.y - this.pointer.heroY;
-                var maxSpeed:number = this.speed * timeDelta;
 
                 var deltaSum:number = Math.abs(deltaX) + Math.abs(deltaY);
                 this.x += deltaX * this.speed * timeDelta / deltaSum;
@@ -180,12 +194,12 @@ class MovingObject extends MapObject {
 
         var pictureTimerFn = function() {
             self.pictureCounter++;
-            self.pictureTimer = setTimeout(pictureTimerFn, self.pictureTime);
+            self.pictureTimer = setTimeout(pictureTimerFn, self.picturesTimeout);
         }
 
         if (moving) {
             if (!this.pictureTimer) {
-                this.pictureTimer = setTimeout(pictureTimerFn, this.pictureTime);
+                this.pictureTimer = setTimeout(pictureTimerFn, this.picturesTimeout);
             }
         } else {
             if (this.pictureTimer) {
@@ -211,35 +225,45 @@ class MovingObject extends MapObject {
 var target = new MapObject({
     x: 32 + (Math.random() * (canvas.width - 64)),
     y: 32 + (Math.random() * (canvas.height - 64)),
-    name: 'target',
-    pictures: [new Picture('images/target.png')]
+    pictures: [new Picture('images/target.png')],
+    blocking: false
+});
+
+var wall = new MapObject({
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    pictures: [new Picture('images/wall.jpeg')],
+    blocking: true
 });
 
 var background = new MapObject({
     x: 0,
     y: 0,
-    name: 'background',
-    pictures: [new Picture('images/background.png')]
+    pictures: [new Picture('images/background.png')],
+    blocking: false
 });
 
-var movingObjects: Array<MovingObject> = [];
+var movingObjects: Array<MapObject> = [];
+var blockingObjects: IMapObject[] = [];
+
+blockingObjects.push(wall);
 
 var hero = new MovingObject({
     x: 0,
     y: 0,
-    name: 'hero',
-    pictures: [new Picture('images/hero.png'), new Picture('images/hero2.png')]
+    pictures: [new Picture('images/hero.png'), new Picture('images/hero2.png')],
+    blocking: false
 
 });
-console.log(123);
 
 var keysDown: Object = Object.create(null);
+
 addEventListener('keydown', function (e) {
-	keysDown[e.keyCode] = true;
+    keysDown[e.keyCode] = true;
 }, false);
 
 addEventListener('keyup', function (e) {
-	delete keysDown[e.keyCode];
+    delete keysDown[e.keyCode];
 }, false);
 
 canvas.addEventListener('click', function(e) {
@@ -250,7 +274,7 @@ canvas.addEventListener('click', function(e) {
 var gameover:boolean = false;
 
 function reset():void {
-    hero.set(canvas.width / 2, canvas.height / 2);
+    hero.set(canvas.width - 50, canvas.height - 50);
     target.set(32 + (Math.random() * (canvas.width - 64)),
         32 + (Math.random() * (canvas.height - 64)));
 }
@@ -258,6 +282,17 @@ function reset():void {
 function update(timeDelta: number):void {
     movingObjects.forEach(function(obj: MovingObject) {
         obj.onTick(timeDelta);
+
+        blockingObjects.forEach(function(blocking: IMapObject) {
+            if (
+                obj.x <= (blocking.x + 32)
+                && blocking.x <= (obj.x + 32)
+                && obj.y <= (blocking.y + 32)
+                && blocking.y <= (obj.y + 32))
+            {
+                console.log('blyat');
+            }
+        });
     });
 
     if (
@@ -268,7 +303,7 @@ function update(timeDelta: number):void {
     ) {
         gameover = true;
         ctx.fillStyle = "rgb(250, 250, 250)";
-        ctx.font = "24px Helvetica";
+        ctx.font = "24px monospace";
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
         ctx.fillText("WINNER IS YOU", 32, 32);
@@ -281,6 +316,7 @@ function render():void {
         return;
 
     background.draw();
+    wall.draw();
     hero.draw();
     target.draw();
 }
@@ -301,10 +337,8 @@ function main():void {
     requestAnimationFrame(main);
 }
 
-// Let's play this game!
 var then:number = Date.now();
 
 reset();
 
-// FIXME
 main();
