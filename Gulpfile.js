@@ -4,8 +4,11 @@ var jade = require('gulp-jade');
 var stylus = require('gulp-stylus');
 
 gulp.task('js', function() {
-    return gulp.src('src/ts/**.ts')
-        .pipe(typescript({target: 'ES5'}))
+    return gulp.src('src/ts/game.ts')
+        .pipe(typescript({
+            target: 'ES5',
+            out: 'game.js'
+        }))
         .pipe(gulp.dest('dist'));
 });
 

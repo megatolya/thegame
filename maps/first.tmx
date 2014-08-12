@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="10" height="10" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="basic" tilewidth="32" tileheight="32">
+  <image source="../inspiration/MqFarIbZrsI.jpg" width="480" height="256"/>
+ </tileset>
+ <layer name="Слой тайлов 1" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJyzZWBgsKUiNkbDhMRJwfJomBx1WUTYk0UjdcRgAEZmGWU=
+  </data>
+ </layer>
+</map>
