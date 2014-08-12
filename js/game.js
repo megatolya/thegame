@@ -249,8 +249,8 @@ var blockingObjects: IMapObject[] = [];
 blockingObjects.push(wall);
 
 var hero = new MovingObject({
-    x: 0,
-    y: 0,
+    x: canvas.width - 50,
+    y: canvas.height - 50,
     pictures: [new Picture('images/hero.png'), new Picture('images/hero2.png')],
     blocking: false
 
@@ -272,12 +272,6 @@ canvas.addEventListener('click', function(e) {
 });
 
 var gameover:boolean = false;
-
-function reset():void {
-    hero.set(canvas.width - 50, canvas.height - 50);
-    target.set(32 + (Math.random() * (canvas.width - 64)),
-        32 + (Math.random() * (canvas.height - 64)));
-}
 
 function update(timeDelta: number):void {
     movingObjects.forEach(function(obj: MovingObject) {
@@ -338,7 +332,5 @@ function main():void {
 }
 
 var then:number = Date.now();
-
-reset();
 
 main();
