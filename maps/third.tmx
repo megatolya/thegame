@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="60" height="60" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="tileset" tilewidth="16" tileheight="16">
+  <image source="../src/images/tileset.png" width="512" height="384"/>
+ </tileset>
+ <layer name="Слой тайлов 1" width="60" height="60">
+  <data encoding="base64" compression="zlib">
+   eJzt2esJwkAQBODVArQyH41EbcRHIz4qiy24QoJ6glwmejuG+XEMAV0u+3HgevXIbDI2m46xrP3719H/ZLvnmZnNfS0ycmmPGn16FZHtnit/h5WvdZOr5Pk5N/bqi/Yq0nfr+9j52je5S56f85D4or1i8v2UqS/aq0jf6sMeu/rm9upffdFeMZ1f+eafX/nKV75lfY++j5Ovc0ZeBuCL1ujTq0hftEaUUx9fhrmlpO+v+sHg2fV97p9D5z0GT8QXnfcYPBFfdN5j8PyGb+7vCQZPxBed9xg85dv9/MpXvvLlSPm+9wOd9xg8EV+0PoMn4ovWb+sw3S+V6CvT/VKJc8N0vxThG/n/ZQlfpvsl+f7+/MpXvvKVL6sv0/1SCV+mLOHLlNH9lq985Stf+cpXvsPP6H7LV77yla985XvPG9Bc6kI=
+  </data>
+ </layer>
+ <layer name="Слой тайлов 2" width="60" height="60">
+  <data encoding="base64" compression="zlib">
+   eJzt1kdOw0AARuGJbwBhQ+ASlE0gl6BsKJcIsIFwDTrXoHMNSso1KCkL3sJSNiwnsWW/T3qapfPL1ighSIplJwlhN8n6V0zPMVtPSrS3TPZ4r/vJ+Cy6FhtPk/FZdL5fSdJ/ZiohzFKV5iqTecYV9/A13dBtxnfyEhuXaYVWI+w9Y885XdBluu2J85le6DXjvRts3KQt2o6w94499/RAj+m2NmeHutTLeG+TjQd0SEcR9r6x550+6DPd1ucc0JBGBfuP8cWeb/qh3xxua/NOO9Sl3oTuqzzps3FAQxqVYO8831yNFmgxh99fbHU2rtE6NUqwV5IkSZIkSZIkSZIkSdP3B2/0Ls8=
+  </data>
+ </layer>
+</map>

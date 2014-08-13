@@ -4,7 +4,9 @@ var jade = require('gulp-jade');
 var stylus = require('gulp-stylus');
 
 gulp.task('js', function() {
-    return gulp.src('src/ts/game.ts')
+    return gulp.src([
+            'src/ts/game.ts'
+        ])
         .pipe(typescript({
             target: 'ES5',
             out: 'game.js'
@@ -29,4 +31,9 @@ gulp.task('styles', function() {
         .pipe(gulp.dest('./dist/css'));
 });
 
-gulp.task('default', ['templates', 'js', 'images', 'styles']);
+gulp.task('components', function() {
+    gulp.src('./bower_components/**')
+        .pipe(gulp.dest('./dist/bower_components'));
+});
+
+gulp.task('default', ['components', 'templates', 'js', 'images', 'styles']);

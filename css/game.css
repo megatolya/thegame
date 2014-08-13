@@ -1,5 +1,42 @@
+html, body
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+table
+    border-collapse: collapse;
+
+.game
+    float: left;
+    text-indent: 0;
+
+
+.properties
+    margin: 10px;
+    float: right;
+
+    @media (max-width: 1000px)
+        &
+            float: left;
+
+    table
+        width: 200px;
+
+        td
+            padding: 20px;
+            border: 1px solid #eee;
+
+            &:first-child
+                width: 150px;
+
+
 canvas
+<<<<<<< HEAD:css/game.css
 {
     width: 512px;
     height: 480px;
 }
+=======
+    width: 500px;
+    height: 500px;
+>>>>>>> 7a09b30... +camera +web-comps:src/styl/game.styl

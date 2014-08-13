@@ -2,7 +2,11 @@
 /// <reference path="classes/picture.ts" />
 /// <reference path="classes/player.ts" />
 /// <reference path="classes/realm.ts" />
+/// <reference path="classes/camera.ts" />
+/// <reference path="ui.ts" />
+/// <reference path="utils/misc.ts" />
 
+(function() {
 var getOffset = function(elem) {
         var top = 0,
             left = 0;
@@ -21,20 +25,28 @@ var getOffset = function(elem) {
 
 var canvas = document.createElement('canvas');
 var ctx = canvas.getContext('2d');
+canvas.width = 500;
+canvas.height = 500;
 
-canvas.width = 512;
-canvas.height = 480;
-document.body.appendChild(canvas);
-
-var world = new Game.Realm("images/tileset.png", map, ctx);
-
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('.game').appendChild(canvas);
+});
 
 var hero = new Game.Player({
-    x: canvas.width - 50,
-    y: canvas.height - 50,
+    x: canvas.width / 2,
+    y: canvas.height / 2,
     pictures: [new Game.Picture('images/hero.png'), new Game.Picture('images/hero2.png')],
     blocking: false
 });
+
+var camera = new Game.Camera({
+    x: hero.x,
+    y: hero.y,
+    width: canvas.width,
+    height: canvas.height
+});
+
+var world = new Game.Realm("images/tileset.png", map, camera);
 
 var keysDown: Object = Object.create(null);
 
@@ -51,38 +63,40 @@ canvas.addEventListener('click', function(e) {
     hero.pointer.set(e.pageX - getOffset(canvas).left, e.pageY - getOffset(canvas).top);
 });
 
-var gameover:boolean = false;
+var gameover: boolean = false;
+
+var logChannel: Utils.Channel = new Utils.Channel('log');
+
+var frames: number = 0;
+var milisecSum: number = 0;
 
 function update(timeDelta: number):void {
-    hero.onTick(timeDelta);
+    milisecSum += timeDelta;
+    frames++;
 
-    /*
-    if (
-        hero.x <= (target.x + 32)
-        && target.x <= (hero.x + 32)
-        && hero.y <= (target.y + 32)
-        && target.y <= (hero.y + 32)
-    ) {
-        gameover = true;
-        ctx.fillStyle = "rgb(250, 250, 250)";
-        ctx.font = "24px monospace";
-        ctx.textAlign = "left";
-        ctx.textBaseline = "top";
-        ctx.fillText("WINNER IS YOU", 32, 32);
-        requestAnimationFrame(main);
+    if (milisecSum > 1) {
+        logChannel.emit('table', {
+            fps: frames
+        });
+
+        milisecSum = 0;
+        frames = 0;
     }
-    */
+
+    hero.onTick(timeDelta);
+    camera.x = hero.x;
+    camera.y = hero.y;
 }
 
 function render():void {
     if (gameover)
         return;
 
-    world.draw();
-    hero.draw();
+    world.draw(ctx);
+    hero.draw(ctx);
 }
 
-function main():void {
+function gameLoop():void {
     if (gameover)
         return;
 
@@ -95,9 +109,13 @@ function main():void {
     then = now;
 
     // Request to do this again ASAP
-    requestAnimationFrame(main);
+    repaint();
 }
+
+var repaint = Utils.debounce(() => requestAnimationFrame(gameLoop), 0);
 
 var then:number = Date.now();
 
-main();
+gameLoop();
+//requestAnimationFrame(gameLoop);
+})();

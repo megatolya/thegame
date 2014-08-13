@@ -1,5 +1,6 @@
 /// <reference path="picture.ts" />
 /// <reference path="map-pointer.ts" />
+/// <reference path="../utils/channels.ts" />
 
 module Game {
     export interface playerParams {
@@ -42,31 +43,9 @@ module Game {
         onTick(timeDelta: number):void {
             var moving = false;
 
-            if (38 in keysDown || 87 in keysDown) { //  up
-                moving = true;
-                this.y -= this.speed * timeDelta;
-            }
-
-            if (40 in keysDown || 83 in keysDown) { // down
-                moving = true;
-                this.y += this.speed * timeDelta;
-            }
-
-            if (37 in keysDown || 65 in keysDown) { // left
-                moving = true;
-                this.x -= this.speed * timeDelta;
-            }
-
-            if (39 in keysDown || 68 in keysDown) { // right
-                moving = true;
-                this.x += this.speed * timeDelta;
-            }
-
             if (this.pointer.active) {
-                // если уже двигаешь клавишами, то поинтер сбросить
-                if (moving) {
-                    this.pointer.reset();
-                } else if (Math.abs(this.pointer.x - this.x) < 2 && Math.abs(this.pointer.y - this.y) < 2) {
+                // TODO
+                if (Math.abs(this.pointer.x - this.x) < 2 && Math.abs(this.pointer.y - this.y) < 2) {
                     this.pointer.reset();
                 } else {
                     var deltaX:number = this.pointer.x - this.pointer.heroX;
@@ -78,6 +57,13 @@ module Game {
                 }
 
                 moving = true;
+
+                var channel: Utils.Channel = new Utils.Channel('log');
+
+                channel.emit('table', {
+                    x: this.x,
+                    y: this.y
+                });
             }
 
             var pictureTimerFn = () => {
@@ -97,7 +83,7 @@ module Game {
             }
         }
 
-        draw() {
+        draw(ctx: CanvasRenderingContext2D) {
             if (this.picture.isReady)
                 ctx.drawImage(this.picture.source, this.x, this.y);
 
