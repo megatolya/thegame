@@ -28,8 +28,6 @@ module Game {
         }
 
         set(x:number, y:number):void {
-            var self = this;
-
             this.visible = true;
             this.active = true;
 
@@ -37,9 +35,10 @@ module Game {
             this.heroY = this._parent.y;
             this.x = x;
             this.y = y;
-            this.timerId = setTimeout(function() {
-                self.visible = false;
-            }, this.visibilityTime);
+            this.timerId = setTimeout(
+                () => this.visible = false,
+                this.visibilityTime
+            );
         }
     }
 }

@@ -26,7 +26,7 @@ canvas.width = 512;
 canvas.height = 480;
 document.body.appendChild(canvas);
 
-var world = new Game.Realm("images/tileset.jpg", map, ctx);
+var world = new Game.Realm("images/tileset.png", map, ctx);
 
 
 var hero = new Game.Player({
@@ -80,9 +80,6 @@ function render():void {
 
     world.draw();
     hero.draw();
-    //background.draw();
-    //wall.draw();
-    //target.draw();
 }
 
 function main():void {

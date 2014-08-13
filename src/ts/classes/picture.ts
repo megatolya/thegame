@@ -9,9 +9,8 @@ module Game {
             var img = new Image();
             img.src = src;
             var self = this;
-            img.onload = function() {
+            img.onload = () =>
                 self.isReady = true;
-            };
             this.source = img;
             this.direction = direction;
         }

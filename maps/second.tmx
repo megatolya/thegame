@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="10" height="10" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="basic" tilewidth="32" tileheight="32">
+     <image source="../src/images/tileset.jpg" width="480" height="256"/>
+ </tileset>
+ <tileset firstgid="121" name="tileset" tilewidth="32" tileheight="32" margin="1">
+  <tileoffset x="-1" y="0"/>
+  <image source="../src/images/tileset.png" width="512" height="512"/>
+ </tileset>
+ <layer name="Слой тайлов 1" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJw7yMDAcBALPgTEk4D4FxRjUwNT9wqIX0PVXcCBLwIxByMDAycUT2IgHd8D4vtQ/ACPurdA/A6K39NR3R8g/gvF/8jwHwgDAGD2RNA=
+  </data>
+ </layer>
+ <layer name="Слой тайлов 2" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJzFyqcSwmAQhdH/tak6oWhKokMATdWhaerjcDSznp055ttbpZQW1CxZsab66Ru27Nhz4Bj0hhNnLly5Bf3Ogycv3nyC/q/r0qMf/Fq06TBkxDjYZeQMmFNQBrsJU2Z8AUSBJ4Y=
+  </data>
+ </layer>
+</map>

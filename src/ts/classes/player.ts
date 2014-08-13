@@ -40,7 +40,6 @@ module Game {
 
         // TODO
         onTick(timeDelta: number):void {
-            var self = this;
             var moving = false;
 
             if (38 in keysDown || 87 in keysDown) { //  up
@@ -81,9 +80,9 @@ module Game {
                 moving = true;
             }
 
-            var pictureTimerFn = function() {
-                self.pictureCounter++;
-                self.pictureTimer = setTimeout(pictureTimerFn, self.picturesTimeout);
+            var pictureTimerFn = () => {
+                this.pictureCounter++;
+                this.pictureTimer = setTimeout(pictureTimerFn, this.picturesTimeout);
             }
 
             if (moving) {
