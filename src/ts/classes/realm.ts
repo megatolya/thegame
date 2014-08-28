@@ -1,6 +1,6 @@
 /// <reference path="../utils/channels.ts" />
 
-var channel: Utils.Channel = new Utils.Channel('settings');
+var channel: utils.Channel = new utils.Channel('settings');
 var showGrid: boolean = false;
 
 channel.on('grid', function(newGrid: boolean) {
@@ -118,14 +118,14 @@ module Game {
                 for (var col: number = 0; col < colsCount; col++) {
                     ctx.beginPath();
                     ctx.lineWidth = 1;
-                    ctx.strokeStyle = 'black';
+                    ctx.strokeStyle = 'grey';
                     ctx.rect(col * tileSize, row * tileSize, col * tileSize + tileSize, row * tileSize + tileSize);
                     ctx.stroke();
 
-                    ctx.font="9px monospace";
-                    ctx.fillStyle = "black";
-                    ctx.fillText(i + '', col * tileSize, row * tileSize + tileSize - 3);
-                    i++;
+                    //ctx.font="9px monospace";
+                    //ctx.fillStyle = "black";
+                    //ctx.fillText(i + '', col * tileSize, row * tileSize + tileSize - 3);
+                    //i++;
                 }
             }
         }

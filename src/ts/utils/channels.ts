@@ -1,6 +1,6 @@
 var listeners = {};
 
-module Utils {
+module utils {
     export class Channel {
         name: string;
 

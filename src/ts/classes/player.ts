@@ -7,18 +7,22 @@ module Game {
         x: number;
         y: number;
         pictures: Array<Picture>;
-        blocking: boolean;
     }
 
     export class Player {
+
+        private static players: Player[] = [];
+
+        static getCurrent(): Player {
+            return this.players[0];
+        }
+
         x: number;
         y: number;
         pictures: Array<Picture>;
         pictureTimer: number = 0;
         picturesTimeout: number = 400;
         pictureCounter: number = 1;
-
-        blocking: boolean;
 
         speed: number = 128;
         pointer: MapPointer;
@@ -28,15 +32,28 @@ module Game {
             this.y = params.y;
             this.pictures = params.pictures;
             this.pointer = new MapPointer(this);
-        }
 
-        set(x: number, y: number):void {
-            this.x = x;
-            this.y = y;
+            Player.players.push(this)
+
+            setTimeout(function() {
+                utils.log({
+                    heroX: this.x,
+                    heroY: this.y
+                });
+            }.bind(this), 0);
         }
 
         get picture():Picture {
             return this.pictures[this.pictureCounter % this.pictures.length];
+        }
+
+        get absX():number {
+            // TODO подумать, где лучше хранить
+            return this.x - Game.Camera.getCurrent().startX;
+        }
+
+        get absY():number {
+            return this.y - Game.Camera.getCurrent().startY;
         }
 
         // TODO
@@ -58,11 +75,11 @@ module Game {
 
                 moving = true;
 
-                var channel: Utils.Channel = new Utils.Channel('log');
+                var channel: utils.Channel = new utils.Channel('log');
 
-                channel.emit('table', {
-                    x: this.x,
-                    y: this.y
+                utils.log({
+                    heroX: this.x,
+                    heroY: this.y
                 });
             }
 
@@ -85,14 +102,9 @@ module Game {
 
         draw(ctx: CanvasRenderingContext2D) {
             if (this.picture.isReady)
-                ctx.drawImage(this.picture.source, this.x, this.y);
+                ctx.drawImage(this.picture.source, this.absX, this.absY);
 
-            if (this.pointer && this.pointer.visible) {
-                ctx.beginPath();
-                ctx.strokeStyle="blue";
-                ctx.rect(this.pointer.x - 5, this.pointer.y - 5, 10, 10);
-                ctx.stroke();
-            }
+            this.pointer.draw(ctx);
         }
     }
 }
