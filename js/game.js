@@ -13,20 +13,20 @@
     domChannel.on('canvasReady', (canvas: HTMLCanvasElement):void => {
         var ctx = canvas.getContext('2d');
 
-        var hero = new Game.Player({
+        var hero: Game.Player = new Game.Player({
             x: canvas.width / 2,
             y: canvas.height / 2,
             pictures: [new Game.Picture('images/hero.png'), new Game.Picture('images/hero2.png')]
         });
 
-        var camera = new Game.Camera({
+        var camera: Game.Camera = new Game.Camera({
             x: hero.x,
             y: hero.y,
             width: canvas.width,
             height: canvas.height
         });
 
-        var world = new Game.Realm("images/tileset.png", map, camera);
+        var world: Game.Realm = new Game.Realm("images/tileset.png", map, camera);
 
         var logChannel: utils.Channel = new utils.Channel('log');
 
@@ -65,7 +65,6 @@
 
             then = now;
 
-            // Request to do this again ASAP
             repaint();
         }
 
@@ -74,6 +73,5 @@
         var then:number = Date.now();
 
         gameLoop();
-        //requestAnimationFrame(gameLoop);
     });
 })();

@@ -2,22 +2,19 @@
 
 module Game {
     export class MapPointer {
-        private visibilityTime: number = 10000;
-        private timerId: number = 0;
-        private _parent: Player;
-
         x: number = 0;
         y: number = 0;
 
-        // TODO
-        heroX: number;
-        heroY: number;
+        fromX: number;
+        fromY: number;
 
         visible: boolean = false;
         active: boolean = false;
 
-        constructor(_parent: Player) {
-            this._parent = _parent;
+        constructor(parent: Player) {
+            this.parent = parent;
+
+            this.picture = new Game.Picture('../images/target.png');
         }
 
         reset():void {
@@ -27,6 +24,17 @@ module Game {
                 this.active = false;
                 this.visible = false;
             }
+
+            this.parent.prevDeltaX = 0;
+            this.parent.prevDeltaY = 0;
+        }
+
+        get deltaX(): number {
+            return this.x - this.fromX;
+        }
+
+        get deltaY(): number {
+            return this.y - this.fromY;
         }
 
         set(absX:number, absY:number):void {
@@ -35,8 +43,8 @@ module Game {
 
             var camera = Game.Camera.getCurrent();
 
-            this.heroX = this._parent.x;
-            this.heroY = this._parent.y;
+            this.fromX = this.parent.x;
+            this.fromY = this.parent.y;
 
             this.x = camera.startX + absX;
             this.y = camera.startY + absY;
@@ -49,13 +57,12 @@ module Game {
             utils.log({
                 heroGoesToX: this.x,
                 heroGoesToY: this.y,
-                heroGoesfromX: this.heroX,
-                heroGoesfromY: this.heroY
+                heroGoesfromX: this.fromX,
+                heroGoesfromY: this.fromY
             });
         }
 
         get absX():number {
-            // TODO подумать, где лучше хранить
             return this.x - Game.Camera.getCurrent().startX;
         }
 
@@ -65,11 +72,14 @@ module Game {
 
         draw(ctx: CanvasRenderingContext2D) {
             if (this.visible) {
-                ctx.beginPath();
-                ctx.strokeStyle = 'red';
-                ctx.rect(this.absX, this.absY, 10, 10);
-                ctx.stroke();
+                ctx.drawImage(this.picture.source, this.absX, this.absY);
             }
         }
+
+        private visibilityTime: number = 10000;
+        private timerId: number = 0;
+        private parent: Player;
+
+        private picture: Game.Picture;
     }
 }

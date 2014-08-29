@@ -27,6 +27,9 @@ module Game {
             if (newX < this.width / 2)
                 return;
 
+            if (newX + this.width / 2 > map.width * map.tilewidth)
+                return;
+
             this._x = newX;
         }
 
@@ -36,6 +39,9 @@ module Game {
 
         set y(newY:number) {
             if (newY < this.width / 2)
+                return;
+
+            if (newY + this.height / 2 > map.height * map.tileheight)
                 return;
 
             this._y = newY;
@@ -62,7 +68,6 @@ module Game {
         }
 
         static getCurrent():Camera {
-            // TODO
             return cameras[0];
         }
     }

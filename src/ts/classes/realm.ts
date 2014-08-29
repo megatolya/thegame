@@ -37,51 +37,60 @@ module Game {
                 this.isReady = true;
         }
 
-        draw(ctx: CanvasRenderingContext2D):void {
-            if (!this.isReady) {
-                return;
-            }
-
-            // FIXME это все работает не правильно
-
-            var rowsCount = this.map.layers[0].width;
-            var colsCount = this.map.layers[0].height;
-
-            var i: number = 0;
+        get rowsSizes(): number[] {
+            var rowsCount = this.map.width;
             var rowsSizes:number[] = [];
-            var colsSizes:number[] = [];
-            var tileSize: number = 16;
-
-            // TODO считать один раз
-            for (i = 0; i < rowsCount; i++) {
-                rowsSizes.push(i * tileSize);
-            }
-
-            for (i = 0; i < colsCount; i++) {
-                colsSizes.push(i * tileSize);
-            }
-
             var startX = this.camera.startX;
             var startY = this.camera.startY;
             var endX = this.camera.endX;
             var endY = this.camera.endY;
 
-            // TODO
+            for (var i = 0; i < rowsCount; i++) {
+                rowsSizes.push(i * this.tileWidth);
+            }
+
             rowsSizes = rowsSizes.filter((size, i):any
                     => (startX < (rowsSizes[i + 1] || 0))
                     && (endX > (rowsSizes[i - 1] || 0)));
+
+            return rowsSizes;
+        }
+
+        get colsSizes() {
+            var colsCount: number = this.map.height;
+            var colsSizes:number[] = [];
+            var startX = this.camera.startX;
+            var startY = this.camera.startY;
+            var endX = this.camera.endX;
+            var endY = this.camera.endY;
+
+            for (var i: number = 0; i < colsCount; i++) {
+                colsSizes.push(i * this.tileHeight);
+            }
 
             colsSizes = colsSizes.filter((size, i):any
                     => (startY < (colsSizes[i + 1] || 0))
                     && (endY > (colsSizes[i - 1] || 0)));
 
-            // TODO
-            var tilesPerRow = 32;
+            return colsSizes;
+        }
+
+        draw(ctx: CanvasRenderingContext2D):void {
+            if (!this.isReady) {
+                return;
+            }
+
+            var rowsCount = this.map.width;
+            var colsCount = this.map.height;
+
+            var tileSize: number = 16;
+
+            var tilesPerRow = this.tilesPerRow;
 
             // TODO считать один раз
             var xyToId: Object = {};
 
-            i = 0;
+            var i = 0;
             for (var row: number = 0; row < rowsCount; row++) {
                 for (var col: number = 0; col < colsCount; col++) {
                     xyToId[row + ';' + col] = i;
@@ -89,19 +98,20 @@ module Game {
                 }
             }
 
-            var ids = [];
-            var xy = [];
+            var rowsSizes = this.rowsSizes;
+            var colsSizes = this.colsSizes;
+
             for (var layerId: number = 0; layerId < 2; layerId ++) {
                 var tilesIds: number[] = this.map.layers[layerId].data;
 
                 for (var row: number, absRow: number = 0; absRow < rowsSizes.length; absRow++) {
                     for (var col: number, absCol: number = 0; absCol < colsSizes.length; absCol++) {
-                        row = rowsSizes[absRow];
-                        col = colsSizes[absCol];
+                        // TODO полная каша с row/col + tileSize
+                        row = colsSizes[absRow];
+                        col = rowsSizes[absCol];
 
+                        // row * 60 + col
                         var cellId = xyToId[row/tileSize + ';' + col/tileSize];
-                        ids.push(cellId);
-                        xy.push(row/tileSize + ';' + col/tileSize);
                         var tileId = tilesIds[cellId] - 1;
                         var tileRow = (tileId / tilesPerRow) | 0;
                         var tileCol = (tileId % tilesPerRow) | 0;
@@ -128,6 +138,18 @@ module Game {
                     //i++;
                 }
             }
+        }
+
+        private get tileWidth(): number {
+            return this.map.tilewidth;
+        }
+
+        private get tileHeight(): number {
+            return this.map.tileheight;
+        }
+
+        private get tilesPerRow(): number {
+            return map.tilesets[0].imagewidth / map.tilewidth;
         }
     }
 }

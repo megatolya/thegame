@@ -10,13 +10,6 @@ module Game {
     }
 
     export class Player {
-
-        private static players: Player[] = [];
-
-        static getCurrent(): Player {
-            return this.players[0];
-        }
-
         x: number;
         y: number;
         pictures: Array<Picture>;
@@ -48,7 +41,6 @@ module Game {
         }
 
         get absX():number {
-            // TODO подумать, где лучше хранить
             return this.x - Game.Camera.getCurrent().startX;
         }
 
@@ -56,55 +48,75 @@ module Game {
             return this.y - Game.Camera.getCurrent().startY;
         }
 
-        // TODO
         onTick(timeDelta: number):void {
-            var moving = false;
-
             if (this.pointer.active) {
-                // TODO
                 if (Math.abs(this.pointer.x - this.x) < 2 && Math.abs(this.pointer.y - this.y) < 2) {
                     this.pointer.reset();
+                    return
                 } else {
-                    var deltaX:number = this.pointer.x - this.pointer.heroX;
-                    var deltaY:number = this.pointer.y - this.pointer.heroY;
+                    var deltaX:number = this.pointer.deltaX;
+                    var deltaY:number = this.pointer.deltaY;
 
                     var deltaSum:number = Math.abs(deltaX) + Math.abs(deltaY);
                     this.x += deltaX * this.speed * timeDelta / deltaSum;
                     this.y += deltaY * this.speed * timeDelta / deltaSum;
                 }
 
-                moving = true;
-
-                var channel: utils.Channel = new utils.Channel('log');
-
-                utils.log({
-                    heroX: this.x,
-                    heroY: this.y
-                });
-            }
-
-            var pictureTimerFn = () => {
-                this.pictureCounter++;
-                this.pictureTimer = setTimeout(pictureTimerFn, this.picturesTimeout);
-            }
-
-            if (moving) {
                 if (!this.pictureTimer) {
-                    this.pictureTimer = setTimeout(pictureTimerFn, this.picturesTimeout);
+                    this.pictureTimer = setTimeout(this.pictureTimerFn, this.picturesTimeout);
                 }
+
+                this.checkFailWay();
+
             } else {
                 if (this.pictureTimer) {
                     clearTimeout(this.pictureTimer);
                     this.pictureTimer = 0;
                 }
             }
+
+            utils.log({
+                heroX: this.x,
+                heroY: this.y
+            });
         }
 
         draw(ctx: CanvasRenderingContext2D) {
+            this.pointer.draw(ctx);
+
             if (this.picture.isReady)
                 ctx.drawImage(this.picture.source, this.absX, this.absY);
+        }
 
-            this.pointer.draw(ctx);
+        private pictureTimerFn (): void {
+            this.pictureCounter++;
+            this.pictureTimer = setTimeout(this.pictureTimerFn, this.picturesTimeout);
+        }
+
+        private checkFailWay(): void {
+            var deltaX: number = Math.abs(this.x - this.pointer.x);
+            var deltaY: number = Math.abs(this.y - this.pointer.y);
+
+            if ((this.prevDeltaX && this.prevDeltaX < deltaX) || (this.prevDeltaY && this.prevDeltaY < deltaY)) {
+                this.x = this.pointer.x;
+                this.y = this.pointer.y;
+                this.pointer.reset();
+                return;
+            }
+
+            this.prevDeltaX = deltaX;
+            this.prevDeltaY = deltaY;
+        }
+
+        // TODO make it private
+        prevDeltaX: number = 0;
+
+        prevDeltaY: number = 0;
+
+        private static players: Player[] = [];
+
+        static getCurrent(): Player {
+            return this.players[0];
         }
     }
 }
