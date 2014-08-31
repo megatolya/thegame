@@ -28,6 +28,8 @@
 
         var world: Game.Realm = new Game.Realm("images/tileset.png", map, camera);
 
+        this.world = world;
+
         var logChannel: utils.Channel = new utils.Channel('log');
 
         var frames: number = 0;

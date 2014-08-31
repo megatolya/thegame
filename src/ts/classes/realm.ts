@@ -7,6 +7,30 @@ channel.on('grid', function(newGrid: boolean) {
     showGrid = newGrid;
 });
 
+interface xy {
+    x: number;
+    y: number;
+    absX?: number;
+    absY?: number;
+}
+
+interface ITile extends xy {
+    absX: number;
+    absY: number;
+    cellId: number;
+    tileId: number;
+    tileRow: number;
+    tileCol: number;
+}
+
+interface Object {
+    __defineGetter__: any;
+}
+
+interface Window {
+    ololo: any;
+}
+
 module Game {
     export interface tiledJSON {
         width: number;
@@ -37,42 +61,84 @@ module Game {
                 this.isReady = true;
         }
 
-        get rowsSizes(): number[] {
-            var rowsCount = this.map.width;
-            var rowsSizes:number[] = [];
-            var startX = this.camera.startX;
-            var startY = this.camera.startY;
-            var endX = this.camera.endX;
-            var endY = this.camera.endY;
+        get allTiles(): xy[] {
+            var maxX = this.map.width * this.tileWidth;
+            var maxY = this.map.height * this.tileHeight;
+            var emptyXY = {x: 0, y: 0};
+            var sizesX: number[] = [];
 
-            for (var i = 0; i < rowsCount; i++) {
-                rowsSizes.push(i * this.tileWidth);
+            var i = 0;
+            var x = 0;
+
+            while (x - this.tileWidth < maxX) {
+                sizesX.push(x);
+                i++;
+                x = i * this.tileWidth;
             }
 
-            rowsSizes = rowsSizes.filter((size, i):any
-                    => (startX < (rowsSizes[i + 1] || 0))
-                    && (endX > (rowsSizes[i - 1] || 0)));
+            var y = 0;
+            var sizes: xy[] = [];
+            var tilesPerRow: number = this.tilesPerRow;
 
-            return rowsSizes;
+            var xyToId: Object = {};
+
+            i = 0;
+            for (var row: number = 0; row < this.map.width; row++) {
+                for (var col: number = 0; col < this.map.height; col++) {
+                    xyToId[row + ';' + col] = i;
+                    i++;
+                }
+            }
+
+            i = 0;
+            while (y - this.tileHeight < maxY) {
+                sizesX.forEach((x) => {
+                    var cellId: number = xyToId[x / this.tileWidth + ';' + y / this.tileHeight];
+                    var tilesIds: number[] = this.map.layers[0].data;
+                    var tileId: number = tilesIds[cellId] - 1;
+
+                    sizes.push({
+                        x: x,
+                        y: y,
+                        cellId: cellId,
+                        tileId: tileId,
+                        tileCol: (tileId / tilesPerRow) | 0,
+                        tileRow: (tileId % tilesPerRow) | 0
+                    });
+                    cellId++;
+                });
+                i++;
+                y = i * this.tileHeight;
+            }
+
+            //delete this.allTiles;
+
+            //this.__defineGetter__('allTiles', () => sizes);
+
+            // TODO define getter
+
+            return sizes;
         }
 
-        get colsSizes() {
-            var colsCount: number = this.map.height;
-            var colsSizes:number[] = [];
+        get tilesToDraw() {
+            var sizes: xy[] = this.allTiles;
             var startX = this.camera.startX;
             var startY = this.camera.startY;
             var endX = this.camera.endX;
             var endY = this.camera.endY;
 
-            for (var i: number = 0; i < colsCount; i++) {
-                colsSizes.push(i * this.tileHeight);
-            }
+            // выше можно выделить в геттер
+            sizes = sizes.filter((size: xy, i: number):any
+                    => startX <= size.x
+                    && endX >= size.x
+                    && startY <= size.y
+                    && endY >= size.y);
 
-            colsSizes = colsSizes.filter((size, i):any
-                    => (startY < (colsSizes[i + 1] || 0))
-                    && (endY > (colsSizes[i - 1] || 0)));
+            sizes = sizes.map((size: xy):any
+                    => (size.absX = size.x - startX, size.absY = size.y - startY, size));
 
-            return colsSizes;
+            //document.body.innerHTML = JSON.stringify(sizes);
+            return sizes;
         }
 
         draw(ctx: CanvasRenderingContext2D):void {
@@ -80,64 +146,31 @@ module Game {
                 return;
             }
 
-            var rowsCount = this.map.width;
-            var colsCount = this.map.height;
+            var tileWidth: number = this.tileWidth;
+            var tileHeight: number = this.tileHeight;
 
-            var tileSize: number = 16;
+            this.tilesToDraw.forEach((tileInfo: ITile) => {
+                ctx.drawImage(
+                    this.image,
+                    tileInfo.tileRow * tileHeight,
+                    tileInfo.tileCol * tileWidth,
+                    tileWidth,
+                    tileHeight,
+                    tileInfo.absX,
+                    tileInfo.absY,
+                    tileWidth,
+                    tileHeight
+                );
 
-            var tilesPerRow = this.tilesPerRow;
-
-            // TODO считать один раз
-            var xyToId: Object = {};
-
-            var i = 0;
-            for (var row: number = 0; row < rowsCount; row++) {
-                for (var col: number = 0; col < colsCount; col++) {
-                    xyToId[row + ';' + col] = i;
-                    i++;
-                }
-            }
-
-            var rowsSizes = this.rowsSizes;
-            var colsSizes = this.colsSizes;
-
-            for (var layerId: number = 0; layerId < 2; layerId ++) {
-                var tilesIds: number[] = this.map.layers[layerId].data;
-
-                for (var row: number, absRow: number = 0; absRow < rowsSizes.length; absRow++) {
-                    for (var col: number, absCol: number = 0; absCol < colsSizes.length; absCol++) {
-                        // TODO полная каша с row/col + tileSize
-                        row = colsSizes[absRow];
-                        col = rowsSizes[absCol];
-
-                        // row * 60 + col
-                        var cellId = xyToId[row/tileSize + ';' + col/tileSize];
-                        var tileId = tilesIds[cellId] - 1;
-                        var tileRow = (tileId / tilesPerRow) | 0;
-                        var tileCol = (tileId % tilesPerRow) | 0;
-
-                        ctx.drawImage(this.image, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, (absCol * tileSize), (absRow * tileSize), tileSize, tileSize);
-                    }
-                }
-            }
+                ctx.font="9px monospace";
+                ctx.fillStyle = "black";
+                ctx.fillText(tileInfo.tileId + '', tileInfo.absX, tileInfo.absY);
+            });
 
             if (!showGrid)
                 return;
 
-            for (var row: number = 0; row < rowsCount; row++) {
-                for (var col: number = 0; col < colsCount; col++) {
-                    ctx.beginPath();
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = 'grey';
-                    ctx.rect(col * tileSize, row * tileSize, col * tileSize + tileSize, row * tileSize + tileSize);
-                    ctx.stroke();
-
-                    //ctx.font="9px monospace";
-                    //ctx.fillStyle = "black";
-                    //ctx.fillText(i + '', col * tileSize, row * tileSize + tileSize - 3);
-                    //i++;
-                }
-            }
+            // setka
         }
 
         private get tileWidth(): number {
@@ -150,6 +183,10 @@ module Game {
 
         private get tilesPerRow(): number {
             return map.tilesets[0].imagewidth / map.tilewidth;
+        }
+
+        private __defineGetter__(str: string, fn: any) {
+            return Object.__defineGetter__.bind(this);
         }
     }
 }
