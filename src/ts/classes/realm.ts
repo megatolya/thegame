@@ -61,7 +61,7 @@ module Game {
                 this.isReady = true;
         }
 
-        get allTiles(): xy[] {
+        get allTiles(): xy[][] {
             var maxX = this.map.width * this.tileWidth;
             var maxY = this.map.height * this.tileHeight;
             var emptyXY = {x: 0, y: 0};
@@ -77,7 +77,7 @@ module Game {
             }
 
             var y = 0;
-            var sizes: xy[] = [];
+            var sizes: xy[][] = [];
             var tilesPerRow: number = this.tilesPerRow;
 
             var xyToId: Object = {};
@@ -94,16 +94,20 @@ module Game {
             while (y - this.tileHeight < maxY) {
                 sizesX.forEach((x) => {
                     var cellId: number = xyToId[x / this.tileWidth + ';' + y / this.tileHeight];
-                    var tilesIds: number[] = this.map.layers[0].data;
-                    var tileId: number = tilesIds[cellId] - 1;
 
-                    sizes.push({
-                        x: x,
-                        y: y,
-                        cellId: cellId,
-                        tileId: tileId,
-                        tileCol: (tileId / tilesPerRow) | 0,
-                        tileRow: (tileId % tilesPerRow) | 0
+                    map.layers.forEach(function(layer, index) {
+                        sizes[index] = sizes[index] || [];
+                        var tilesIds: number[] = layer.data;
+                        var tileId: number = tilesIds[cellId] - 1;
+
+                        sizes[index].push({
+                            x: x,
+                            y: y,
+                            cellId: cellId,
+                            tileId: tileId,
+                            tileCol: (tileId / tilesPerRow) | 0,
+                            tileRow: (tileId % tilesPerRow) | 0
+                        });
                     });
                     cellId++;
                 });
@@ -111,31 +115,39 @@ module Game {
                 y = i * this.tileHeight;
             }
 
-            //delete this.allTiles;
+            delete this.allTiles;
 
-            //this.__defineGetter__('allTiles', () => sizes);
+            this.__defineGetter__('allTiles', () => sizes);
 
-            // TODO define getter
+             //TODO define getter
 
             return sizes;
         }
 
-        get tilesToDraw() {
-            var sizes: xy[] = this.allTiles;
+        get tilesToDraw(): xy[][] {
+            var sizes: xy[][] = this.allTiles;
             var startX = this.camera.startX;
             var startY = this.camera.startY;
             var endX = this.camera.endX;
             var endY = this.camera.endY;
+            var tileWidth = this.tileWidth;
+            var tileHeight = this.tileHeight;
 
-            // выше можно выделить в геттер
-            sizes = sizes.filter((size: xy, i: number):any
-                    => startX <= size.x
-                    && endX >= size.x
-                    && startY <= size.y
-                    && endY >= size.y);
+            sizes = sizes.map((layer: xy[], i: number) => {
+                var layerToDraw: xy[] = layer.filter((size: xy) => {
+                    return startX <= size.x + tileWidth
+                        && endX >= size.x - tileWidth
+                        && startY <= size.y + tileHeight
+                        && endY >= size.y - tileHeight;
+                });
 
-            sizes = sizes.map((size: xy):any
-                    => (size.absX = size.x - startX, size.absY = size.y - startY, size));
+                layerToDraw.forEach((size: xy) => {
+                    size.absX = size.x - startX;
+                    size.absY = size.y - startY;
+                });
+
+                return layerToDraw;
+            });
 
             return sizes;
         }
@@ -148,18 +160,20 @@ module Game {
             var tileWidth: number = this.tileWidth;
             var tileHeight: number = this.tileHeight;
 
-            this.tilesToDraw.forEach((tileInfo: ITile) => {
-                ctx.drawImage(
-                    this.image,
-                    tileInfo.tileRow * tileHeight,
-                    tileInfo.tileCol * tileWidth,
-                    tileWidth,
-                    tileHeight,
-                    tileInfo.absX,
-                    tileInfo.absY,
-                    tileWidth,
-                    tileHeight
-                );
+            this.tilesToDraw.forEach((layer: ITile[]) => {
+                layer.forEach((tileInfo: ITile) => {
+                    ctx.drawImage(
+                        this.image,
+                        tileInfo.tileRow * tileHeight,
+                        tileInfo.tileCol * tileWidth,
+                        tileWidth,
+                        tileHeight,
+                        tileInfo.absX,
+                        tileInfo.absY,
+                        tileWidth,
+                        tileHeight
+                    );
+                });
             });
 
 
