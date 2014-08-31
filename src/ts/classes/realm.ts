@@ -85,7 +85,7 @@ module Game {
             i = 0;
             for (var row: number = 0; row < this.map.width; row++) {
                 for (var col: number = 0; col < this.map.height; col++) {
-                    xyToId[row + ';' + col] = i;
+                    xyToId[col + ';' + row] = i;
                     i++;
                 }
             }
@@ -137,7 +137,6 @@ module Game {
             sizes = sizes.map((size: xy):any
                     => (size.absX = size.x - startX, size.absY = size.y - startY, size));
 
-            //document.body.innerHTML = JSON.stringify(sizes);
             return sizes;
         }
 
@@ -161,11 +160,8 @@ module Game {
                     tileWidth,
                     tileHeight
                 );
-
-                ctx.font="9px monospace";
-                ctx.fillStyle = "black";
-                ctx.fillText(tileInfo.tileId + '', tileInfo.absX, tileInfo.absY);
             });
+
 
             if (!showGrid)
                 return;
