@@ -2,6 +2,13 @@
 /// <reference path="map-pointer.ts" />
 /// <reference path="../utils/channels.ts" />
 
+var channel: utils.Channel = new utils.Channel('settings');
+var showGrid: boolean = false;
+
+channel.on('grid', function(newGrid: boolean) {
+    showGrid = newGrid;
+});
+
 module Game {
     export interface playerParams {
         x: number;
@@ -12,10 +19,6 @@ module Game {
     export class Player {
         x: number;
         y: number;
-        pictures: Array<Picture>;
-        pictureTimer: number = 0;
-        picturesTimeout: number = 400;
-        pictureCounter: number = 1;
 
         speed: number = 128;
         pointer: MapPointer;
@@ -63,7 +66,7 @@ module Game {
                 }
 
                 if (!this.pictureTimer) {
-                    this.pictureTimer = setTimeout(this.pictureTimerFn, this.picturesTimeout);
+                    this.pictureTimer = setTimeout(this.pictureTimerFn.bind(this), this.picturesTimeout);
                 }
 
                 this.checkFailWay();
@@ -84,13 +87,32 @@ module Game {
         draw(ctx: CanvasRenderingContext2D) {
             this.pointer.draw(ctx);
 
-            if (this.picture.isReady)
-                ctx.drawImage(this.picture.source, this.absX, this.absY);
+
+            // TODO tile class?
+            var tileWidth = Game.Realm.getCurrent().tileWidth;
+            var tileHeight = Game.Realm.getCurrent().tileWidth;
+
+            if (showGrid) {
+                this.hoveredTiles.forEach((tile: any) => {
+                    tile.absX = tile.x - Game.Camera.getCurrent().startX;
+                    tile.absY = tile.y - Game.Camera.getCurrent().startY;
+                    ctx.beginPath();
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = 'red';
+                    ctx.rect(tile.absX, tile.absY, tileWidth, tileHeight);
+                    ctx.stroke();
+                });
+            }
+
+            if (this.picture.isReady) {
+                ctx.drawImage(this.picture.source, this.absX - this.width / 2, this.absY - this.height / 2);
+            }
         }
 
-        private pictureTimerFn (): void {
+        // TODO interval picture
+         pictureTimerFn (): void {
             this.pictureCounter++;
-            this.pictureTimer = setTimeout(this.pictureTimerFn, this.picturesTimeout);
+            this.pictureTimer = setTimeout(this.pictureTimerFn.bind(this), this.picturesTimeout);
         }
 
         private checkFailWay(): void {
@@ -108,6 +130,14 @@ module Game {
             this.prevDeltaY = deltaY;
         }
 
+        get width(): number {
+            return this.picture.source.width;
+        }
+
+        get height(): number {
+            return this.picture.source.height;
+        }
+
         // TODO make it private
         prevDeltaX: number = 0;
 
@@ -115,8 +145,24 @@ module Game {
 
         private static players: Player[] = [];
 
+        private pictures: Array<Picture>;
+        private pictureTimer: number = 0;
+        private picturesTimeout: number = 400;
+        private pictureCounter: number = 1;
+
         static getCurrent(): Player {
             return this.players[0];
+        }
+
+        // TODO ITile
+        get hoveredTiles(): Game.ITile[] {
+            var tiles: Game.ITile[] = Game.Realm.getCurrent().allTiles[0];
+            return tiles.filter((tileData: ITile) => {
+                return tileData.x > this.x - this.width
+                    && tileData.x < this.x + this.width
+                    && tileData.y > this.y - this.height
+                    && tileData.y < this.y + this.height;
+            }, this);
         }
     }
 }

@@ -26,9 +26,9 @@
             height: canvas.height
         });
 
-        var world: Game.Realm = new Game.Realm("images/tileset.png", map, camera);
+        var realm: Game.Realm = new Game.Realm("images/tileset.png", map, camera);
 
-        this.world = world;
+        this.realm = realm;
 
         var logChannel: utils.Channel = new utils.Channel('log');
 
@@ -54,7 +54,7 @@
         }
 
         function render():void {
-            world.draw(ctx);
+            realm.draw(ctx);
             hero.draw(ctx);
         }
 

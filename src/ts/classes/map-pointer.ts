@@ -1,5 +1,7 @@
 /// <reference path="../utils/channels.ts" />
 
+// TODO interface Game.MapObject
+
 module Game {
     export class MapPointer {
         x: number = 0;
@@ -72,8 +74,16 @@ module Game {
 
         draw(ctx: CanvasRenderingContext2D) {
             if (this.visible) {
-                ctx.drawImage(this.picture.source, this.absX, this.absY);
+                ctx.drawImage(this.picture.source, this.absX - this.width / 2, this.absY - this.height / 2);
             }
+        }
+
+        get width(): number {
+            return this.picture.source.width;
+        }
+
+        get height(): number {
+            return this.picture.source.height;
         }
 
         private visibilityTime: number = 10000;

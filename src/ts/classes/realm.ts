@@ -1,27 +1,12 @@
 /// <reference path="../utils/channels.ts" />
 
 var channel: utils.Channel = new utils.Channel('settings');
+// TODO вынести в класс tile
 var showGrid: boolean = false;
 
 channel.on('grid', function(newGrid: boolean) {
     showGrid = newGrid;
 });
-
-interface xy {
-    x: number;
-    y: number;
-    absX?: number;
-    absY?: number;
-}
-
-interface ITile extends xy {
-    absX: number;
-    absY: number;
-    cellId: number;
-    tileId: number;
-    tileRow: number;
-    tileCol: number;
-}
 
 interface Object {
     __defineGetter__: any;
@@ -31,7 +16,25 @@ interface Window {
     ololo: any;
 }
 
+var realms = [];
+
 module Game {
+    export interface xy {
+        x: number;
+        y: number;
+        absX?: number;
+        absY?: number;
+    }
+
+    export interface ITile extends xy {
+        absX: number;
+        absY: number;
+        cellId: number;
+        tileId: number;
+        tileRow: number;
+        tileCol: number;
+    }
+
     export interface tiledJSON {
         width: number;
         height: number;
@@ -59,9 +62,11 @@ module Game {
             this.image.src = tilesetPath;
             this.image.onload = () =>
                 this.isReady = true;
+
+            realms.push(this);
         }
 
-        get allTiles(): xy[][] {
+        get allTiles(): any[][] {
             var maxX = this.map.width * this.tileWidth;
             var maxY = this.map.height * this.tileHeight;
             var emptyXY = {x: 0, y: 0};
@@ -100,6 +105,9 @@ module Game {
                         var tilesIds: number[] = layer.data;
                         var tileId: number = tilesIds[cellId] - 1;
 
+                        if (!tileId || !cellId)
+                            return;
+
                         sizes[index].push({
                             x: x,
                             y: y,
@@ -124,8 +132,8 @@ module Game {
             return sizes;
         }
 
-        get tilesToDraw(): xy[][] {
-            var sizes: xy[][] = this.allTiles;
+        get tilesToDraw(): ITile[][] {
+            var sizes: ITile[][] = this.allTiles;
             var startX = this.camera.startX;
             var startY = this.camera.startY;
             var endX = this.camera.endX;
@@ -133,15 +141,15 @@ module Game {
             var tileWidth = this.tileWidth;
             var tileHeight = this.tileHeight;
 
-            sizes = sizes.map((layer: xy[], i: number) => {
-                var layerToDraw: xy[] = layer.filter((size: xy) => {
+            sizes = sizes.map((layer: ITile[], i: number): ITile[] => {
+                var layerToDraw: ITile[] = layer.filter((size: ITile) => {
                     return startX <= size.x + tileWidth
                         && endX >= size.x - tileWidth
                         && startY <= size.y + tileHeight
                         && endY >= size.y - tileHeight;
                 });
 
-                layerToDraw.forEach((size: xy) => {
+                layerToDraw.forEach((size: ITile) => {
                     size.absX = size.x - startX;
                     size.absY = size.y - startY;
                 });
@@ -160,16 +168,18 @@ module Game {
             var tileWidth: number = this.tileWidth;
             var tileHeight: number = this.tileHeight;
 
-            this.tilesToDraw.forEach((layer: ITile[]) => {
-                layer.forEach((tileInfo: ITile) => {
+            var tilesToDraw: xy[][] = this.tilesToDraw;
+
+            tilesToDraw.forEach((layer: ITile[]) => {
+                layer.forEach((tileData: ITile) => {
                     ctx.drawImage(
                         this.image,
-                        tileInfo.tileRow * tileHeight,
-                        tileInfo.tileCol * tileWidth,
+                        tileData.tileRow * tileHeight,
+                        tileData.tileCol * tileWidth,
                         tileWidth,
                         tileHeight,
-                        tileInfo.absX,
-                        tileInfo.absY,
+                        tileData.absX,
+                        tileData.absY,
                         tileWidth,
                         tileHeight
                     );
@@ -180,14 +190,20 @@ module Game {
             if (!showGrid)
                 return;
 
-            // setka
+            tilesToDraw[0].forEach((tileData: ITile) => {
+                ctx.beginPath();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'grey';
+                ctx.rect(tileData.absX, tileData.absY, tileWidth, tileHeight);
+                ctx.stroke();
+            });
         }
 
-        private get tileWidth(): number {
+        get tileWidth(): number {
             return this.map.tilewidth;
         }
 
-        private get tileHeight(): number {
+        get tileHeight(): number {
             return this.map.tileheight;
         }
 
@@ -197,6 +213,10 @@ module Game {
 
         private __defineGetter__(str: string, fn: any) {
             return Object.__defineGetter__.bind(this);
+        }
+
+        static getCurrent(): Realm {
+            return realms[0];
         }
     }
 }
