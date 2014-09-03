@@ -1,13 +1,6 @@
 /// <reference path="picture.ts" />
-/// <reference path="map-pointer.ts" />
+/// <reference path="way-point.ts" />
 /// <reference path="../utils/channels.ts" />
-
-var channel: utils.Channel = new utils.Channel('settings');
-var showGrid: boolean = false;
-
-channel.on('grid', function(newGrid: boolean) {
-    showGrid = newGrid;
-});
 
 module Game {
     export interface playerParams {
@@ -17,26 +10,27 @@ module Game {
     }
 
     export class Player {
+        private showGrid: boolean;
+
         x: number;
         y: number;
 
         speed: number = 128;
-        pointer: MapPointer;
+        pointer: WayPoint;
 
         constructor(params: playerParams) {
             this.x = params.x;
             this.y = params.y;
             this.pictures = params.pictures;
-            this.pointer = new MapPointer(this);
+            this.pointer = new WayPoint(this);
 
             Player.players.push(this)
 
-            setTimeout(function() {
-                utils.log({
-                    heroX: this.x,
-                    heroY: this.y
-                });
-            }.bind(this), 0);
+            this.showGrid = Game.Settings.get('grid');
+
+            new utils.Channel('settings').on('grid', (newVal: boolean) => {
+                this.showGrid = newVal;
+            });
         }
 
         get picture():Picture {
@@ -52,21 +46,36 @@ module Game {
         }
 
         onTick(timeDelta: number):void {
+            this.deltaSum += timeDelta;
+
             if (this.pointer.active) {
+                if (this.deltaSum > this.picturesTimeout / 1000) {
+                    this.deltaSum = 0;
+                    this.pictureCounter++;
+                }
+
                 if (Math.abs(this.pointer.x - this.x) < 2 && Math.abs(this.pointer.y - this.y) < 2) {
                     this.pointer.reset();
-                    return
+                    this.deltaSum = 0;
+                    return;
                 } else {
                     var deltaX:number = this.pointer.deltaX;
                     var deltaY:number = this.pointer.deltaY;
 
                     var deltaSum:number = Math.abs(deltaX) + Math.abs(deltaY);
+                    var prevX = this.x;
+                    var prevY = this.y;
+
                     this.x += deltaX * this.speed * timeDelta / deltaSum;
                     this.y += deltaY * this.speed * timeDelta / deltaSum;
-                }
 
-                if (!this.pictureTimer) {
-                    this.pictureTimer = setTimeout(this.pictureTimerFn.bind(this), this.picturesTimeout);
+                    if (this.hoveredTiles.some((tile: Game.ITile): boolean => tile.blocking)) {
+                        this.pointer.reset();
+                        this.deltaSum;
+                        // TODO перенести в сеттер x/y
+                        this.x = prevX;
+                        this.y = prevY;
+                    }
                 }
 
                 this.checkFailWay();
@@ -77,11 +86,6 @@ module Game {
                     this.pictureTimer = 0;
                 }
             }
-
-            utils.log({
-                heroX: this.x,
-                heroY: this.y
-            });
         }
 
         draw(ctx: CanvasRenderingContext2D) {
@@ -90,15 +94,15 @@ module Game {
 
             // TODO tile class?
             var tileWidth = Game.Realm.getCurrent().tileWidth;
-            var tileHeight = Game.Realm.getCurrent().tileWidth;
+            var tileHeight = Game.Realm.getCurrent().tileHeight;
 
-            if (showGrid) {
-                this.hoveredTiles.forEach((tile: any) => {
+            if (this.showGrid) {
+                this.hoveredTiles.forEach((tile: Game.ITile) => {
                     tile.absX = tile.x - Game.Camera.getCurrent().startX;
                     tile.absY = tile.y - Game.Camera.getCurrent().startY;
                     ctx.beginPath();
                     ctx.lineWidth = 1;
-                    ctx.strokeStyle = 'red';
+                    ctx.strokeStyle = 'orange';
                     ctx.rect(tile.absX, tile.absY, tileWidth, tileHeight);
                     ctx.stroke();
                 });
@@ -109,12 +113,7 @@ module Game {
             }
         }
 
-        // TODO interval picture
-         pictureTimerFn (): void {
-            this.pictureCounter++;
-            this.pictureTimer = setTimeout(this.pictureTimerFn.bind(this), this.picturesTimeout);
-        }
-
+        // ушел дальше, чем указывает WayPoint
         private checkFailWay(): void {
             var deltaX: number = Math.abs(this.x - this.pointer.x);
             var deltaY: number = Math.abs(this.y - this.pointer.y);
@@ -150,18 +149,20 @@ module Game {
         private picturesTimeout: number = 400;
         private pictureCounter: number = 1;
 
+        private deltaSum: number = 0;
+
         static getCurrent(): Player {
             return this.players[0];
         }
 
-        // TODO ITile
         get hoveredTiles(): Game.ITile[] {
-            var tiles: Game.ITile[] = Game.Realm.getCurrent().allTiles[0];
+            var tiles: Game.ITile[] = Game.Realm.getCurrent().allTiles[1];
+            // TODO Нормальные условия
             return tiles.filter((tileData: ITile) => {
                 return tileData.x > this.x - this.width
                     && tileData.x < this.x + this.width
-                    && tileData.y > this.y - this.height
-                    && tileData.y < this.y + this.height;
+                    && tileData.y < this.y + Game.Realm.getCurrent().tileHeight
+                    && tileData.y > this.y
             }, this);
         }
     }

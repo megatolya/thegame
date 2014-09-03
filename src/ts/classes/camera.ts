@@ -11,24 +11,36 @@ module Game {
     export class Camera {
         private width: number;
         private height: number;
-        private _x: number;
-        private _y: number;
+        private _x: number = 0;
+        private _y: number = 0;
 
         constructor(params: ICameraParams) {
+            this.width = params.width;
+            this.height = params.height;
+
             this.x = params.x;
             this.y = params.y;
 
-            this.width = params.width;
-            this.height = params.height;
+            if (this.x <= 0) {
+                // TODO use x
+                this._x = this.width / 2;
+            }
+
+            if (this.y <= 0) {
+                this._y = this.height / 2;
+            }
+
             cameras.push(this);
         }
 
         set x(newX:number) {
-            if (newX < this.width / 2)
+            if (newX < this.width / 2) {
                 return;
+            }
 
-            if (newX + this.width / 2 > map.width * map.tilewidth)
+            if (newX + this.width / 2 > map.width * map.tilewidth) {
                 return;
+            }
 
             this._x = newX;
         }

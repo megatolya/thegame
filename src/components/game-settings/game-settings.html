@@ -1,0 +1,25 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/core-localstorage/core-localstorage.html">
+
+<polymer-element name="game-settings" hidden>
+    <template>
+        <core-localstorage id="storage"></core-localstorage>
+    </template>
+    <script>
+        Polymer('game-settings', {
+            get: function(key) {
+                this.$.storage.name = key;
+                this.$.storage.load();
+                return this.$.storage.value;
+            },
+
+            set: function(key, val) {
+                var settingsChannel = new utils.Channel('settings');
+
+                this.$.storage.name = key;
+                this.$.storage.value = val;
+                this.$.storage.save();
+                settingsChannel.emit(key, val); }
+        });
+    </script>
+</polymer-element>

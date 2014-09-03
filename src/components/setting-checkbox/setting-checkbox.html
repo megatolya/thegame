@@ -1,0 +1,34 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/components/game-settings/game-settings.html" />
+<link rel="import" href="/bower_components/paper-checkbox/paper-checkbox.html" />
+
+<polymer-element name="setting-checkbox" attributes="name">
+<template>
+    <paper-checkbox id="checkbox" on-change="{{onChange}}" checked="{{checked}}"></paper-checkbox>
+    <game-settings id="settings"></game-settings>
+</template>
+<script>
+Polymer('setting-checkbox', {
+    ready: function() {
+        var val = this.$.settings.get(this.name);
+
+        if (val === null) {
+            val = false;
+            this.$.settings.set(this.name, false);
+        }
+
+        this.$.checkbox.checked = val;
+    },
+
+    checked: false,
+
+    onChange: function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.asyncFire('change');
+
+        this.$.settings.set(this.name, this.checked);
+    }
+});
+</script>
+</polymer-element>

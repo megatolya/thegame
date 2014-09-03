@@ -1,70 +1,64 @@
+/// <reference path="classes/settings.ts" />
 /// <reference path="utils/channels.ts" />
 
 interface Element {
     innerText: any;
+
+    getCanvas: any;
 }
 
-(function() {
+interface Window {
+    Polymer: any;
+}
 
-    var settingsChannel: utils.Channel = new utils.Channel('settings');
-    var logChannel: utils.Channel = new utils.Channel('log');
-    var domChannel: utils.Channel = new utils.Channel('dom');
-    var canvas = document.createElement('canvas');
-    var ctx = canvas.getContext('2d');
-    canvas.width = 500;
-    canvas.height = 500;
+var settings = Game.Settings;
 
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelector('.game').appendChild(canvas);
+
+window.Polymer('the-game', {
+    width: 500,
+    height: 500,
+    ready: function() {
+        var canvas = this.$.gameCanvas;
+        var ctx = canvas.getContext('2d');
+
+        this.setCanvasSize(canvas);
+
         new utils.Channel('dom').emit('canvasReady', canvas);
 
-        var checkbox:any = document.querySelector('paper-checkbox');
+        canvas.addEventListener('click', (e) => {
+            var getOffset = utils.getOffset;
+            var hero = Game.Player.getCurrent();
 
-        checkbox.addEventListener('change', function() {
-            settingsChannel.emit('grid', checkbox.checked);
+            hero.pointer.set(e.pageX - getOffset(canvas).left, e.pageY - getOffset(canvas).top);
         });
 
-        logChannel.on('table', (coords: any):void => {
-            for (var name in coords) {
-                var val = coords[name];
-
-                if (typeof val === 'object' && val !== null) {
-                    val = JSON.stringify(val);
-                }
-
-                if (typeof val === 'number') {
-                    val = Math.round(val);
-                }
-
-                var elem = document.querySelector('table .' + name);
-                if (elem) {
-                    elem.innerText = val;
-                } else {
-                    var tr = document.createElement('tr');
-                    var tdName = document.createElement('td');
-                    var tdVal = document.createElement('td');
-
-                    tdVal.classList.add(name);
-
-                    tdName.innerText = name;
-                    tdVal.innerText = val;
-
-                    tr.appendChild(tdName);
-                    tr.appendChild(tdVal);
-                    document.querySelector('table').appendChild(tr);
-                }
-            }
+        window.addEventListener('resize', (e) => {
+            this.setCanvasSize(canvas);
         });
-    });
 
+        var settingsChannel: utils.Channel = new utils.Channel('settings');
 
+        settingsChannel.on('fullsize', (newVal: boolean) => this.setCanvasSize(canvas));
+    },
 
-    canvas.addEventListener('click', function(e) {
-        var getOffset = utils.getOffset;
-        var hero = Game.Player.getCurrent();
+    setCanvasSize(canvas: HTMLCanvasElement): void {
+        var fullsize = settings.get('fullsize');
+        var width: number;
+        var height: number;
 
-        hero.pointer.reset();
-        hero.pointer.set(e.pageX - getOffset(canvas).left, e.pageY - getOffset(canvas).top);
-    });
+        if (fullsize) {
+            width = document.body.clientWidth;
+            height = document.body.clientHeight;
+        } else {
+            width = this.width;
+            height = this.height;
+        }
 
-})();
+        var canvasSize = [width, height];
+
+        canvas.width = canvasSize[0];
+        canvas.height = canvasSize[1];
+        canvas.style.width = canvasSize[0] + 'px';
+        canvas.style.height = canvasSize[1] + 'px';
+    }
+});

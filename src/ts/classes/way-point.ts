@@ -3,7 +3,7 @@
 // TODO interface Game.MapObject
 
 module Game {
-    export class MapPointer {
+    export class WayPoint {
         x: number = 0;
         y: number = 0;
 
@@ -40,28 +40,30 @@ module Game {
         }
 
         set(absX:number, absY:number):void {
-            this.visible = true;
-            this.active = true;
-
             var camera = Game.Camera.getCurrent();
+            var newX = camera.startX + absX;
+            var newY = camera.startY + absY;
 
+            if (newX > Game.Realm.getCurrent().width
+                || newY > Game.Realm.getCurrent().height
+                ) {
+                return;
+            }
+
+            this.reset();
             this.fromX = this.parent.x;
             this.fromY = this.parent.y;
 
-            this.x = camera.startX + absX;
-            this.y = camera.startY + absY;
+            this.x = newX;
+            this.y = newY;
 
             this.timerId = setTimeout(
                 () => this.visible = false,
                 this.visibilityTime
             );
 
-            utils.log({
-                heroGoesToX: this.x,
-                heroGoesToY: this.y,
-                heroGoesfromX: this.fromX,
-                heroGoesfromY: this.fromY
-            });
+            this.visible = true;
+            this.active = true;
         }
 
         get absX():number {

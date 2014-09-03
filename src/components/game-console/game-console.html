@@ -1,0 +1,21 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/components/setting-checkbox/setting-checkbox.html" />
+<polymer-element name="game-console">
+    <template>
+        <link rel="stylesheet" href="game-console.css" />
+        <table id="table">
+            <tr>
+                <td>Сетка</td>
+                <td>
+                    <setting-checkbox id="gridCheckbox" name="grid"></setting-checkbox>
+            </tr>
+            <tr>
+                <td>На весь экран</td>
+                <td>
+                    <setting-checkbox id="fullsizeCheckbox" name="fullsize"></setting-checkbox>
+                </td>
+            </tr>
+        </table>
+    </template>
+    <script src="game-console.js"></script>
+</polymer-element>

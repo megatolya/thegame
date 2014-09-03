@@ -1,13 +1,5 @@
 /// <reference path="../utils/channels.ts" />
 
-var channel: utils.Channel = new utils.Channel('settings');
-// TODO вынести в класс tile
-var showGrid: boolean = false;
-
-channel.on('grid', function(newGrid: boolean) {
-    showGrid = newGrid;
-});
-
 interface Object {
     __defineGetter__: any;
 }
@@ -33,6 +25,7 @@ module Game {
         tileId: number;
         tileRow: number;
         tileCol: number;
+        blocking: boolean;
     }
 
     export interface tiledJSON {
@@ -54,6 +47,7 @@ module Game {
         private image: HTMLImageElement;
         private isReady: boolean = false;
         private camera: Camera;
+        private showGrid: boolean;
 
         constructor(tilesetPath: string, map: tiledJSON, camera) {
             this.image = new Image();
@@ -64,11 +58,19 @@ module Game {
                 this.isReady = true;
 
             realms.push(this);
+
+            var channel: utils.Channel = new utils.Channel('settings');
+            // TODO вынести в класс tile
+            this.showGrid = Game.Settings.get('grid');
+
+            channel.on('grid', (newGrid: boolean) => {
+                this.showGrid = newGrid;
+            });
         }
 
         get allTiles(): any[][] {
-            var maxX = this.map.width * this.tileWidth;
-            var maxY = this.map.height * this.tileHeight;
+            var maxX = this.width;
+            var maxY = this.height;
             var emptyXY = {x: 0, y: 0};
             var sizesX: number[] = [];
 
@@ -100,13 +102,14 @@ module Game {
                 sizesX.forEach((x) => {
                     var cellId: number = xyToId[x / this.tileWidth + ';' + y / this.tileHeight];
 
-                    map.layers.forEach(function(layer, index) {
+                    map.layers.forEach(function(layer, index: number) {
                         sizes[index] = sizes[index] || [];
                         var tilesIds: number[] = layer.data;
                         var tileId: number = tilesIds[cellId] - 1;
 
-                        if (!tileId || !cellId)
+                        if (!tileId || !cellId) {
                             return;
+                        }
 
                         sizes[index].push({
                             x: x,
@@ -114,6 +117,7 @@ module Game {
                             cellId: cellId,
                             tileId: tileId,
                             tileCol: (tileId / tilesPerRow) | 0,
+                            blocking: tileId !== -1 && index === 1,
                             tileRow: (tileId % tilesPerRow) | 0
                         });
                     });
@@ -127,7 +131,7 @@ module Game {
 
             this.__defineGetter__('allTiles', () => sizes);
 
-             //TODO define getter
+            //TODO define getter
 
             return sizes;
         }
@@ -187,13 +191,25 @@ module Game {
             });
 
 
-            if (!showGrid)
+            if (!this.showGrid)
                 return;
 
-            tilesToDraw[0].forEach((tileData: ITile) => {
+            tilesToDraw[1].forEach((tileData: ITile) => {
+                if (tileData.blocking)
+                    return;
                 ctx.beginPath();
                 ctx.lineWidth = 1;
-                ctx.strokeStyle = 'grey';
+                ctx.strokeStyle = 'green';
+                ctx.rect(tileData.absX, tileData.absY, tileWidth, tileHeight);
+                ctx.stroke();
+            });
+
+            tilesToDraw[1].forEach((tileData: ITile) => {
+                if (!tileData.blocking)
+                    return;
+                ctx.beginPath();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'red';
                 ctx.rect(tileData.absX, tileData.absY, tileWidth, tileHeight);
                 ctx.stroke();
             });
@@ -205,6 +221,14 @@ module Game {
 
         get tileHeight(): number {
             return this.map.tileheight;
+        }
+
+        get width(): number {
+            return this.map.width * this.map.tilewidth;
+        }
+
+        get height(): number {
+            return this.map.height * this.map.tileheight;
         }
 
         private get tilesPerRow(): number {

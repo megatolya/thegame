@@ -1,0 +1,17 @@
+:host {
+    text-indent: 0;
+    margin: 10px;
+    right: 0;
+
+}
+
+#table {
+    background: white;
+    color: black;
+    border-collapse: collapse;
+}
+
+#table td {
+    padding: 20px;
+    border: 1px solid black;
+}
