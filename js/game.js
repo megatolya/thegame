@@ -1,7 +1,8 @@
 /// <reference path="ui.ts" />
 /// <reference path="map.ts" />
 /// <reference path="classes/picture.ts" />
-/// <reference path="classes/player.ts" />
+/// <reference path="classes/creatures/knight.ts" />
+/// <reference path="classes/creatures/demon.ts" />
 /// <reference path="classes/realm.ts" />
 /// <reference path="classes/camera.ts" />
 /// <reference path="classes/settings.ts" />
@@ -11,10 +12,14 @@
 new utils.Channel('dom').on('canvasReady', (canvas: HTMLCanvasElement):void => {
     var ctx = canvas.getContext('2d');
 
-    var hero: Game.Player = new Game.Player({
+    var hero: Creatures.ICreature = new Creatures.Knight({
         x: 100,
-        y: 100,
-        pictures: [new Game.Picture('images/hero.png'), new Game.Picture('images/hero2.png')]
+        y: 100
+    });
+
+    var demon: Creatures.ICreature = new Creatures.Demon({
+        x: 150,
+        y: 150
     });
 
     var camera: Game.Camera = new Game.Camera({
@@ -23,7 +28,7 @@ new utils.Channel('dom').on('canvasReady', (canvas: HTMLCanvasElement):void => {
         canvas: canvas
     });
 
-    var realm: Game.Realm = new Game.Realm("images/tileset.png", map, camera);
+    var realm: Game.Realm = new Game.Realm('/images/tileset.png', map, camera);
 
     this.realm = realm;
 
@@ -44,6 +49,7 @@ new utils.Channel('dom').on('canvasReady', (canvas: HTMLCanvasElement):void => {
         }
 
         hero.onTick(timeDelta);
+        demon.onTick(timeDelta);
         camera.x = hero.x;
         camera.y = hero.y;
     }
@@ -51,6 +57,7 @@ new utils.Channel('dom').on('canvasReady', (canvas: HTMLCanvasElement):void => {
     function render():void {
         realm.draw(ctx);
         hero.draw(ctx);
+        demon.draw(ctx);
     }
 
     function gameLoop():void {

@@ -1,6 +1,5 @@
 /// <reference path="../utils/channels.ts" />
-
-// TODO interface Game.MapObject
+/// <reference path="creatures/interface.ts" />
 
 module Game {
     export class WayPoint {
@@ -13,10 +12,8 @@ module Game {
         visible: boolean = false;
         active: boolean = false;
 
-        constructor(parent: Player) {
+        constructor(parent: Creatures.ICreature) {
             this.parent = parent;
-
-            this.picture = new Game.Picture('../images/target.png');
         }
 
         reset():void {
@@ -57,10 +54,10 @@ module Game {
             this.x = newX;
             this.y = newY;
 
-            this.timerId = setTimeout(
+            this.visibilityTime && (this.timerId = setTimeout(
                 () => this.visible = false,
                 this.visibilityTime
-            );
+            ));
 
             this.visible = true;
             this.active = true;
@@ -74,24 +71,10 @@ module Game {
             return this.y - Game.Camera.getCurrent().startY;
         }
 
-        draw(ctx: CanvasRenderingContext2D) {
-            if (this.visible) {
-                ctx.drawImage(this.picture.source, this.absX - this.width / 2, this.absY - this.height / 2);
-            }
-        }
+        draw(ctx: CanvasRenderingContext2D) { }
 
-        get width(): number {
-            return this.picture.source.width;
-        }
-
-        get height(): number {
-            return this.picture.source.height;
-        }
-
-        private visibilityTime: number = 10000;
+        private visibilityTime: number = 0;
         private timerId: number = 0;
-        private parent: Player;
-
-        private picture: Game.Picture;
+        private parent: Creatures.ICreature;
     }
 }

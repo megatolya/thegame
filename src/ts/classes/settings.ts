@@ -7,17 +7,38 @@ if (!this.localStorage) {
 interface Element {
     get: any;
     set: any;
+    reset: any;
+}
+
+interface ISettings {
+    get: any;
+    set: any;
+    reset: any;
+}
+
+function getSettings(): ISettings {
+    return document.querySelector('game-settings') || Game.DefaultSettings;
 }
 
 module Game {
-    export class Settings {
+    export class DefaultSettings {
         public static get(key: string): any {
-            var settings = document.querySelector('game-settings');
+            return null;
+        }
+
+        public static set(key: string, val: any): void {}
+
+        public static reset(key: string) {}
+    }
+
+    export class Settings extends DefaultSettings {
+        public static get(key: string): any {
+            var settings = getSettings();
 
             return settings.get(key);
         }
 
-        public static (key: string, val: any): void {
+        public static set(key: string, val: any): void {
             var settings = document.querySelector('game-settings');
 
             return settings.set(key, val);
@@ -27,4 +48,5 @@ module Game {
             localStorage.removeItem(key);
         }
     }
+
 }

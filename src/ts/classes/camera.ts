@@ -25,8 +25,8 @@ module Game {
             cameras.push(this);
 
             var resize = () => {
-                this.x = Game.Player.getCurrent().x - this.width / 2;
-                this.y = Game.Player.getCurrent().y - this.height / 2;
+                this.x = Game.GameObject.getCurrent().x - this.width / 2;
+                this.y = Game.GameObject.getCurrent().y - this.height / 2;
             };
 
             window.addEventListener('resize', resize);
@@ -64,19 +64,19 @@ module Game {
         }
 
         get startX():number {
-            return this.x - this.width / 2;
+            return Math.round(this.x - this.width / 2);
         }
 
         get startY():number {
-            return this.y - this.height / 2;
+            return Math.round(this.y - this.height / 2);
         }
 
         get endX():number {
-            return this.x + this.width / 2;
+            return Math.round(this.x + this.width / 2);
         }
 
         get endY():number {
-            return this.y + this.height / 2;
+            return Math.round(this.y + this.height / 2);
         }
 
         static getCurrent():Camera {

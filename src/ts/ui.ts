@@ -1,5 +1,6 @@
 /// <reference path="classes/settings.ts" />
 /// <reference path="utils/channels.ts" />
+/// <reference path="classes/game-object.ts" />
 
 interface Element {
     innerText: any;
@@ -17,6 +18,8 @@ var settings = Game.Settings;
 window.Polymer('the-game', {
     width: 500,
     height: 500,
+    zoom: 2,
+
     ready: function() {
         var canvas = this.$.gameCanvas;
         var ctx = canvas.getContext('2d');
@@ -27,9 +30,9 @@ window.Polymer('the-game', {
 
         canvas.addEventListener('click', (e) => {
             var getOffset = utils.getOffset;
-            var hero = Game.Player.getCurrent();
+            var hero = Game.GameObject.getCurrent();
 
-            hero.pointer.set(e.pageX - getOffset(canvas).left, e.pageY - getOffset(canvas).top);
+            hero.pointer.set((e.pageX - getOffset(canvas).left) / this.zoom, (e.pageY - getOffset(canvas).top) / this.zoom);
         });
 
         window.addEventListener('resize', (e) => {
@@ -47,18 +50,16 @@ window.Polymer('the-game', {
         var height: number;
 
         if (fullsize) {
-            width = document.body.clientWidth;
-            height = document.body.clientHeight;
+            width = document.body.clientWidth / this.zoom;
+            height = document.body.clientHeight / this.zoom;
         } else {
             width = this.width;
             height = this.height;
         }
 
-        var canvasSize = [width, height];
-
-        canvas.width = canvasSize[0];
-        canvas.height = canvasSize[1];
-        canvas.style.width = canvasSize[0] + 'px';
-        canvas.style.height = canvasSize[1] + 'px';
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.width = (width * this.zoom) + 'px';
+        canvas.style.height = (height * this.zoom) + 'px';
     }
 });
