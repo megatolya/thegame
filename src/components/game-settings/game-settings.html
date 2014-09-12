@@ -10,7 +10,9 @@
             get: function(key) {
                 this.$.storage.name = key;
                 this.$.storage.load();
-                return this.$.storage.value;
+                var val = this.$.storage.value;
+                this.setAttribute(key, val);
+                return val;
             },
 
             set: function(key, val) {
@@ -19,7 +21,9 @@
                 this.$.storage.name = key;
                 this.$.storage.value = val;
                 this.$.storage.save();
-                settingsChannel.emit(key, val); }
+                settingsChannel.emit(key, val);
+                this.setAttribute(key, val);
+            }
         });
     </script>
 </polymer-element>

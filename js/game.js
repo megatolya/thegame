@@ -20,8 +20,7 @@ new utils.Channel('dom').on('canvasReady', (canvas: HTMLCanvasElement):void => {
     var camera: Game.Camera = new Game.Camera({
         x: hero.x,
         y: hero.y,
-        width: canvas.width,
-        height: canvas.height
+        canvas: canvas
     });
 
     var realm: Game.Realm = new Game.Realm("images/tileset.png", map, camera);

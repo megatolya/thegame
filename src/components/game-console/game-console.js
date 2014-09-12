@@ -1,38 +1,28 @@
 Polymer('game-console', {
     ready: function() {
+        this.data = [];
+
         var logChannel = new utils.Channel('log');
 
         logChannel.on('table', function(coords) {
-            //for (var name in coords) {
-                //var val = coords[name];
+            for (var name in coords) {
+                var val = coords[name];
+                this.data[name] = val;
 
-                //if (typeof val === 'object' && val !== null) {
-                    //val = JSON.stringify(val);
-                //}
+                var changed = false;
 
-                //if (typeof val === 'number') {
-                    //val = Math.round(val);
-                //}
+                for (var i = 0; i < this.data.length; i++) {
+                    var msg = this.data[i];
+                    if (msg.name === name) {
+                        msg.value = val;
+                        changed = true;
+                    }
+                }
 
-                //var elem = document.querySelector('table .' + name);
-
-                //if (elem) {
-                    //elem.innerText = val;
-                //} else {
-                    //var tr = document.createElement('tr');
-                    //var tdName = document.createElement('td');
-                    //var tdVal = document.createElement('td');
-
-                    //tdVal.classList.add(name);
-
-                    //tdName.innerText = name;
-                    //tdVal.innerText = val;
-
-                    //tr.appendChild(tdName);
-                    //tr.appendChild(tdVal);
-                    //document.querySelector('table').appendChild(tr);
-                //}
-            //}
-        });
+                if (!changed) {
+                    this.data.push({name: name, value: val});
+                }
+            }
+        }.bind(this));
     }
 });

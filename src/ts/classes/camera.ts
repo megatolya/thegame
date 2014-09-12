@@ -4,20 +4,12 @@ module Game {
     export interface ICameraParams {
         x: number;
         y: number;
-        width: number;
-        height: number;
+        canvas: HTMLCanvasElement;
     }
 
     export class Camera {
-        private width: number;
-        private height: number;
-        private _x: number = 0;
-        private _y: number = 0;
-
         constructor(params: ICameraParams) {
-            this.width = params.width;
-            this.height = params.height;
-
+            this.canvas = params.canvas;
             this.x = params.x;
             this.y = params.y;
 
@@ -82,6 +74,18 @@ module Game {
         static getCurrent():Camera {
             return cameras[0];
         }
+
+        private get width(): number {
+            return this.canvas.width;
+        }
+
+        private get height(): number {
+            return this.canvas.height;
+        }
+
+        private _x: number = 0;
+        private _y: number = 0;
+        private canvas: HTMLCanvasElement;
     }
 }
 
