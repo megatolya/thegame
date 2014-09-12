@@ -23,6 +23,14 @@ module Game {
             }
 
             cameras.push(this);
+
+            var resize = () => {
+                this.x = Game.Player.getCurrent().x - this.width / 2;
+                this.y = Game.Player.getCurrent().y - this.height / 2;
+            };
+
+            window.addEventListener('resize', resize);
+            new utils.Channel('settings').on('fullsize', resize);
         }
 
         set x(newX:number) {
