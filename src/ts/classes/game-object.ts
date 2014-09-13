@@ -1,6 +1,7 @@
 /// <reference path="picture.ts" />
 /// <reference path="way-point.ts" />
 /// <reference path="creatures/interface.ts" />
+/// <reference path="settings.ts" />
 /// <reference path="../utils/channels.ts" />
 
 module Game {
@@ -19,7 +20,7 @@ module Game {
             this.pictures = [];
             this.pointer = new WayPoint(this);
 
-            GameObject.players.push(this)
+            GameObject.players.push(this);
 
             this.showGrid = Game.Settings.get('grid');
 
@@ -49,15 +50,15 @@ module Game {
             var tileHeight = Game.Realm.getCurrent().tileHeight;
 
             if (this.showGrid) {
-                this.hoveredTiles.forEach((tile: Game.ITile) => {
-                    tile.absX = tile.x - Game.Camera.getCurrent().startX;
-                    tile.absY = tile.y - Game.Camera.getCurrent().startY;
-                    ctx.beginPath();
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = 'orange';
-                    ctx.rect(tile.absX, tile.absY, tileWidth, tileHeight);
-                    ctx.stroke();
-                });
+                //this.hoveredTiles.forEach((tile: Game.ITile) => {
+                    //tile.absX = tile.x - Game.Camera.getCurrent().startX;
+                    //tile.absY = tile.y - Game.Camera.getCurrent().startY;
+                    //ctx.beginPath();
+                    //ctx.lineWidth = 1;
+                    //ctx.strokeStyle = 'orange';
+                    //ctx.rect(tile.absX, tile.absY, tileWidth, tileHeight);
+                    //ctx.stroke();
+                //});
             }
 
             if (this.picture.isReady) {

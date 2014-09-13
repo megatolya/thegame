@@ -1,3 +1,5 @@
+/// <reference path="../realm.ts" />
+
 module Creatures {
     export interface ICreature {
         x: number;

@@ -1,4 +1,5 @@
 /// <reference path="../utils/channels.ts" />
+/// <reference path="camera.ts" />
 
 interface Object {
     __defineGetter__: any;
@@ -46,7 +47,7 @@ module Game {
         private map: tiledJSON;
         private image: HTMLImageElement;
         private isReady: boolean = false;
-        private camera: Camera;
+        private camera: Game.Camera;
         private showGrid: boolean;
 
         constructor(tilesetPath: string, map: tiledJSON, camera) {
@@ -194,7 +195,7 @@ module Game {
             if (!this.showGrid)
                 return;
 
-            tilesToDraw[1].forEach((tileData: ITile) => {
+            tilesToDraw[0].forEach((tileData: ITile) => {
                 if (tileData.blocking)
                     return;
                 ctx.beginPath();
@@ -204,15 +205,15 @@ module Game {
                 ctx.stroke();
             });
 
-            tilesToDraw[1].forEach((tileData: ITile) => {
-                if (!tileData.blocking)
-                    return;
-                ctx.beginPath();
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = 'red';
-                ctx.rect(tileData.absX, tileData.absY, tileWidth, tileHeight);
-                ctx.stroke();
-            });
+            //tilesToDraw[1].forEach((tileData: ITile) => {
+                //if (!tileData.blocking)
+                    //return;
+                //ctx.beginPath();
+                //ctx.lineWidth = 1;
+                //ctx.strokeStyle = 'red';
+                //ctx.rect(tileData.absX, tileData.absY, tileWidth, tileHeight);
+                //ctx.stroke();
+            //});
         }
 
         get tileWidth(): number {
@@ -220,6 +221,7 @@ module Game {
         }
 
         get tileHeight(): number {
+            return 64;
             return this.map.tileheight;
         }
 

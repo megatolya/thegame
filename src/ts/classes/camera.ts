@@ -1,3 +1,6 @@
+/// <reference path="game-object.ts" />
+/// <reference path="../map.ts" />
+
 var cameras: Game.Camera[] = [];
 
 module Game {

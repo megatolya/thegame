@@ -1,0 +1,88 @@
+
+body {
+  font-family: 'Signika Negative', sans-serif;
+  background: #f9f9f9
+}
+
+h1 { 
+  font-size: 30px
+}
+
+a, a:visited {
+  color: #00A2D4;
+  text-decoration: none
+}
+
+a:hover {
+  color: #008DBA
+}
+
+p {
+  text-align: justify;
+  line-height: 26px
+}
+
+footer {
+  font-size: 10px;
+}
+
+#twitter-widget-0{
+}
+
+#content {
+  width: 1000px;
+  margin: 0 auto
+}
+
+#canvasHolder {
+  border: solid 1px #f0f0f0;
+  margin: 20px 0;
+}
+
+.sampleImage {
+  position: relative;
+  display: block
+}
+
+.sampleImage p {
+  visibility: hidden;
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  top: 20px;
+  left: 20px;
+  width: 220px;
+  font-size: 13px;
+  width: 280px;
+  color: #000
+}
+
+.sampleImage img {
+  blur: 0px;
+  brightness: 1;
+  -webkit-opacity: 1.0;
+  -moz-opacity: 1.0;
+  -ms-opacity: 1.0;
+  -o-opacity: 1.0;
+  opacity: 1.0;
+}
+
+.sampleImage:hover img {
+  opacity: 0.2;
+  blur: 1px;
+  brightness: 1.9;
+  -webkit-filter: blur(1px)  brightness(1.9) opacity(0.2);
+  -webkit-transition: all 1s ease;
+  -moz-transition: all 1s ease;
+  -o-transition: all 1s ease;
+  -ms-transition: all 1s ease;
+  transition: all 1s ease
+}
+
+.sampleImage:hover p {
+  visibility: visible
+}
+
+.clear {
+  clear: both
+}

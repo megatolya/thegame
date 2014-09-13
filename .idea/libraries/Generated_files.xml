@@ -1,0 +1,53 @@
+<component name="libraryTable">
+  <library name="Generated files" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/src/ts/classes/settings.js" />
+        <item url="file://$PROJECT_DIR$/src/ts/map.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/dcjs/dc-tests.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/d3/d3-tests.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/domo/domo-tests.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/rx/rx.all.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/tv4/tv4-tests.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/rx/rx.async-tests.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/chai/chai-tests.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/rx/rx.backpressure-tests.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/ace/all-tests.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/elm/elm-tests.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/dot/dot-tests.js" />
+        <item url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/pdf/pdf-tests.js" />
+        <item url="file://$PROJECT_DIR$/src/ts/classes/camera.js" />
+        <item url="file://$PROJECT_DIR$/src/ts/classes/picture.js" />
+        <item url="file://$PROJECT_DIR$/src/ts/classes/game-object.js" />
+        <item url="file://$PROJECT_DIR$/src/ts/classes/creatures/interface.js" />
+        <item url="file://$PROJECT_DIR$/src/ts/classes/way-point.js" />
+        <item url="file://$PROJECT_DIR$/src/ts/utils/channels.js" />
+        <item url="file://$PROJECT_DIR$/src/ts/classes/realm.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/src/ts/classes/settings.js" />
+      <root url="file://$PROJECT_DIR$/src/ts/map.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/d3/d3-tests.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/dcjs/dc-tests.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/rx/rx.all.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/domo/domo-tests.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/rx/rx.async-tests.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/tv4/tv4-tests.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/rx/rx.backpressure-tests.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/chai/chai-tests.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/elm/elm-tests.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/ace/all-tests.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/pdf/pdf-tests.js" />
+      <root url="file://$PROJECT_DIR$/dist/bower_components/DefinitelyTyped/dot/dot-tests.js" />
+      <root url="file://$PROJECT_DIR$/src/ts/classes/camera.js" />
+      <root url="file://$PROJECT_DIR$/src/ts/classes/picture.js" />
+      <root url="file://$PROJECT_DIR$/src/ts/classes/game-object.js" />
+      <root url="file://$PROJECT_DIR$/src/ts/classes/creatures/interface.js" />
+      <root url="file://$PROJECT_DIR$/src/ts/classes/way-point.js" />
+      <root url="file://$PROJECT_DIR$/src/ts/utils/channels.js" />
+      <root url="file://$PROJECT_DIR$/src/ts/classes/realm.js" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>

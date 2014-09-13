@@ -28,7 +28,7 @@ new utils.Channel('dom').on('canvasReady', (canvas: HTMLCanvasElement):void => {
         canvas: canvas
     });
 
-    var realm: Game.Realm = new Game.Realm('/images/tileset.png', map, camera);
+    var realm: Game.Realm = new Game.Realm('/images/iso-tileset.png', map, camera);
 
     this.realm = realm;
 
