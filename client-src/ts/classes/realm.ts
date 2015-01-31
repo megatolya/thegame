@@ -221,7 +221,6 @@ module Game {
         }
 
         get tileHeight(): number {
-            return 64;
             return this.map.tileheight;
         }
 
