@@ -5,6 +5,7 @@
 #### Backend -> Frontend (socket)
 ##### game
 `game.realm.new`
+
 Параметры:
 ```javascript
 {
@@ -15,6 +16,7 @@
 
 ##### player
 `player:movement:start`
+
 Параметры:
 ```javascript
 {
