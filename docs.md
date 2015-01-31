@@ -6,7 +6,7 @@
 ##### game
 `game.realm.new`
 Параметры:
-```json
+```javascript
 {
     map: mapData,
     camera: coords
@@ -16,7 +16,7 @@
 ##### player
 `player:movement:start`
 Параметры:
-```json
+```javascript
 {
     x: number,
     y: number
