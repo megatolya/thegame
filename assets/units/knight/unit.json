@@ -1,0 +1,6 @@
+{
+    pictures: {
+        stand: ['knight.png'],
+        moving: ['knight2.png', 'knight.png']
+    }
+}

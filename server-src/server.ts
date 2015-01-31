@@ -10,6 +10,9 @@ var app = express();
 var server =  http.createServer(app);
 var io = socketio.listen(server);
 
+
+var realms = require('./realms');
+
 global.config = config;
 app
     .set('views', __dirname + '/views')
@@ -35,7 +38,20 @@ app
 
 io
     //.set('log level', 1)
-    .sockets.on('connection', () => console.log('io connected'));
+    .sockets.on('connection', socket => {
+        socket.on('player:movement:start', coords => {
+            console.log('emiting...');
+            socket.emit('player:movement:start', coords);
+        });
+        socket.on('game.ready', coords => {
+            socket.emit('game.realm.new', {
+                map: {
+                    image: 
+                }
+                coords: 
+            });
+        });
+    });
 
 server.listen(config.port);
 console.log('Server works at http://' + config.host + ':' + config.port);

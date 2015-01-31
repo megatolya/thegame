@@ -1,4 +1,5 @@
 /// <reference path="ui.ts" />
+/// <reference path="transport.ts" />
 /// <reference path="map.ts" />
 /// <reference path="classes/picture.ts" />
 /// <reference path="classes/creatures/knight.ts" />
@@ -7,74 +8,75 @@
 /// <reference path="classes/camera.ts" />
 /// <reference path="classes/settings.ts" />
 /// <reference path="utils/misc.ts" />
-/// <reference path="utils/channels.ts" />
 
-new utils.Channel('dom').on('canvasReady', (canvas: HTMLCanvasElement):void => {
-    var ctx = canvas.getContext('2d');
+var socketChannel = new utils.Channel('socket');
 
-    var hero: Creatures.ICreature = new Creatures.Knight({
-        x: 100,
-        y: 100
-    });
+new utils.Channel('dom').on('canvas:ready', (canvas: HTMLCanvasElement):void => {
+    //var ctx = canvas.getContext('2d');
 
-    var demon: Creatures.ICreature = new Creatures.Demon({
-        x: 150,
-        y: 150
-    });
+    //var hero: Creatures.ICreature = new Creatures.Knight({
+        //x: 100,
+        //y: 100
+    //});
 
-    var camera: Game.Camera = new Game.Camera({
-        x: hero.x,
-        y: hero.y,
-        canvas: canvas
-    });
+    //var demon: Creatures.ICreature = new Creatures.Demon({
+        //x: 150,
+        //y: 150
+    //});
 
-    var realm: Game.Realm = new Game.Realm('/images/tileset.png', map, camera);
+    //var camera: Game.Camera = new Game.Camera({
+        //x: hero.x,
+        //y: hero.y,
+        //canvas: canvas
+    //});
 
-    this.realm = realm;
+    //var realm: Game.Realm = new Game.Realm('/images/tileset.png', map, camera);
 
-    var frames: number = 0;
-    var milisecSum: number = 0;
+    //this.realm = realm;
 
-    function update(timeDelta: number):void {
-        milisecSum += timeDelta;
-        frames++;
+    //var frames: number = 0;
+    //var milisecSum: number = 0;
 
-        if (milisecSum > 1) {
-            utils.log({
-                fps: frames
-            });
+    //function update(timeDelta: number):void {
+        //milisecSum += timeDelta;
+        //frames++;
 
-            milisecSum = 0;
-            frames = 0;
-        }
+        //if (milisecSum > 1) {
+            //utils.log({
+                //fps: frames
+            //});
 
-        hero.onTick(timeDelta);
-        demon.onTick(timeDelta);
-        camera.x = hero.x;
-        camera.y = hero.y;
-    }
+            //milisecSum = 0;
+            //frames = 0;
+        //}
 
-    function render():void {
-        realm.draw(ctx);
-        hero.draw(ctx);
-        demon.draw(ctx);
-    }
+        ////hero.onTick(timeDelta);
+        ////demon.onTick(timeDelta);
+        ////camera.x = hero.x;
+        ////camera.y = hero.y;
+    //}
 
-    function gameLoop():void {
-        var now:number = Date.now();
-        var delta:number = now - then;
+    //function render():void {
+        //realm.draw(ctx);
+        ////hero.draw(ctx);
+        ////demon.draw(ctx);
+    //}
 
-        update(delta / 1000);
-        render();
+    //function gameLoop():void {
+        //var now:number = Date.now();
+        //var delta:number = now - then;
 
-        then = now;
+        //update(delta / 1000);
+        //render();
 
-        repaint();
-    }
+        //then = now;
 
-    var repaint = utils.debounce(() => requestAnimationFrame(gameLoop), 0);
+        //repaint();
+    //}
 
-    var then:number = Date.now();
+    //var repaint = utils.debounce(() => requestAnimationFrame(gameLoop), 0);
 
-    gameLoop();
+    //var then:number = Date.now();
+
+    //gameLoop();
 });

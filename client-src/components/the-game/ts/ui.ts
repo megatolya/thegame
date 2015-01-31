@@ -26,13 +26,19 @@ window.Polymer('the-game', {
 
         this.setCanvasSize(canvas);
 
-        new utils.Channel('dom').emit('canvasReady', canvas);
+        var domChannel = new utils.Channel('dom');
+
+        domChannel.emit('canvas:ready', canvas);
 
         canvas.addEventListener('click', (e) => {
             var getOffset = utils.getOffset;
             var hero = Game.GameObject.getCurrent();
 
-            hero.pointer.set((e.pageX - getOffset(canvas).left) / this.zoom, (e.pageY - getOffset(canvas).top) / this.zoom);
+            //hero.pointer.set((e.pageX - getOffset(canvas).left) / this.zoom, (e.pageY - getOffset(canvas).top) / this.zoom);
+            domChannel.emit('canvas:click', {
+                x: (e.pageX - getOffset(canvas).left) / this.zoom,
+                y: (e.pageY - getOffset(canvas).top) / this.zoom
+            });
         });
 
         window.addEventListener('resize', (e) => {

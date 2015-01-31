@@ -1,6 +1,9 @@
 /// <reference path="../utils/channels.ts" />
 /// <reference path="creatures/interface.ts" />
 
+var socketChannel = new utils.Channel('socket');
+var domChannel = new utils.Channel('dom');
+
 module Game {
     export class WayPoint {
         x: number = 0;
@@ -14,9 +17,15 @@ module Game {
 
         constructor(parent: Creatures.ICreature) {
             this.parent = parent;
+            domChannel.on('canvas:click', (coords) => {
+                this.set(coords.x, coords.y, false);
+            });
+            socketChannel.on('player:movement:start', coords => {
+                this.set(coords.x, coords.y, true)
+            });
         }
 
-        reset():void {
+        reset(): void {
             if (this.timerId) {
                 clearTimeout(this.timerId);
                 this.timerId = 0;
@@ -36,7 +45,8 @@ module Game {
             return this.y - this.fromY;
         }
 
-        set(absX:number, absY:number):void {
+        set(absX:number, absY:number, activate:boolean = true):void {
+            console.log('set!');
             var camera = Game.Camera.getCurrent();
             var newX = camera.startX + absX;
             var newY = camera.startY + absY;
@@ -60,14 +70,17 @@ module Game {
             ));
 
             this.visible = true;
-            this.active = true;
+
+            if (activate) {
+                this.active = true;
+            }
         }
 
-        get absX():number {
+        get absX(): number {
             return this.x - Game.Camera.getCurrent().startX;
         }
 
-        get absY():number {
+        get absY(): number {
             return this.y - Game.Camera.getCurrent().startY;
         }
 
