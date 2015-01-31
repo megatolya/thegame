@@ -63,7 +63,7 @@ gulp.task('components', ['components-copy'], function(callback) {
     });
 
     return merge.apply(null, filesToCompile.map(function(file) {
-        console.log(file, 'hello');
+        console.log('Compiling', file);
         return gulp.src(file)
             .pipe(typescript({
                 target: 'ES5',
@@ -75,9 +75,9 @@ gulp.task('components', ['components-copy'], function(callback) {
 
 gulp.task('clean-ts-files', ['components'], function(callback) {
     walk(CLIENT_DIST + '/components').forEach(function(file) {
-        if (/\/ts\/index\.ts$/.test(file)) {
+        if (/\/ts\/.*\.ts$/.test(file)) {
             console.log('Removing', file);
-            fs.removeFileSync(file);
+            fs.unlink(file);
         }
     });
     callback();
