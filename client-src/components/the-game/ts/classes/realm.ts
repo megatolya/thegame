@@ -51,6 +51,7 @@ module Game {
         private showGrid: boolean;
 
         constructor(tilesetPath: string, map: tiledJSON, camera) {
+            console.log('realm', arguments);
             this.image = new Image();
             this.camera = camera;
             this.map = map;

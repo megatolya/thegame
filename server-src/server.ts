@@ -35,12 +35,10 @@ app
 
     .get('/', (req, res) => res.sendFile(path.resolve(path.join(__dirname, '../client/index.html'))));
 
-// This endpoint reveals it
 app.get("/session", function(req:any, res){
-    console.log('req.session', req.session);
-  sessionStore.get(req.sessionID, function(err, data) {
-    res.json({err: err, data:data, sessionID: req.sessionID});
-  });
+    sessionStore.get(req.sessionID, function(err, data) {
+        res.json({err: err, data:data, sessionID: req.sessionID});
+    });
 });
 
 assetsManager.registerHandlers(app);

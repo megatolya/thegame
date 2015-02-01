@@ -4,10 +4,8 @@ import socketio = require('socket.io');
 import express = require('express');
 var connect = require('connect');
 var cookie = require('cookie');
-
 var misc = require('../common/misc');
 var assetsManager = require('./assets-manager');
-
 var coords = misc.coords;
 
 module.exports = (server, sessionStore) => {
@@ -19,12 +17,10 @@ module.exports = (server, sessionStore) => {
                 .replace(/^s:/, '')
                 .replace(/\..+$/, '');
 
-            console.log('sessionID', socket.sessionID);
             if (!socket.session) {
                 sessionStore.get(socket.sessionID, function(err, session) {
-                    console.log('err', err);
-                    console.log('session', session);
                     socket.session = session;
+                    session
                     next();
                 });
                 return;
@@ -33,20 +29,16 @@ module.exports = (server, sessionStore) => {
             next();
         })
         .on('connection', (socket, err) => {
-            console.log('socket cookies is', socket.cookie);
-            console.log('=========================================');
-            console.log('socket session is', socket.session);
-            console.log('=========================================');
             socket.on('player:movement:start', coords => {
-                console.log('emiting...');
                 socket.emit('player:movement:start', coords);
             });
             socket.on('game.ready', () => {
-                console.log('GAME READY!');
                 var realm = assetsManager.getRealm('testing-arena');
 
+                console.log('emiting!');
                 socket.emit('game.realm.new', {
                     map: realm.map,
+                    tileset: realm.url,
                     coords: coords(100, 100)
                 });
             });

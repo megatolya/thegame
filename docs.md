@@ -25,6 +25,16 @@
 }
 ```
 
+`player.new`
+
+Параметры:
+```javascript
+{
+    unit: string,
+    isCurrent: string,
+    coords: coords
+}
+
 #### Frontend -> Backend (socket)
 ##### game
 `game.ready`

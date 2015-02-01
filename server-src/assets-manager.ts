@@ -29,7 +29,12 @@ class Realm implements IRealm {
     }
 
     get tilesetFilePath (): string  {
-        return path.resolve(__dirname + '../../assets/realms/' + this._name + '/' + this.tilesetFileName);
+        // TODO copy assets to dist
+        return path.resolve(__dirname + '../../../assets/realms/' + this._name + '/' + this.tilesetFileName);
+    }
+
+    get url(): string {
+        return TILESET_PATH + this.code;
     }
 
     get map() {
@@ -37,7 +42,7 @@ class Realm implements IRealm {
     }
 
     get code(): string {
-        return md5(this.tilesetFileName);
+        return md5(this.tilesetFileName) + '.png';
     }
 
     toString(): string {

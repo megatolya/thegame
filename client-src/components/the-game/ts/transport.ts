@@ -13,6 +13,9 @@ socket.on('game:realm:new', () => {
 socket.on('player:movement:start', coords => {
     socketChannel.emit('player:movement:start', coords);
 });
+socket.on('game.realm.new', data => {
+    socketChannel.emit('game.realm.new', data);
+});
 
 domChannel.on('canvas:click', (coords) => {
     socketChannel.emit('player:movement:start', coords);
