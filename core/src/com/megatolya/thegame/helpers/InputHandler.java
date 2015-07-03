@@ -15,60 +15,31 @@ public class InputHandler implements InputProcessor{
 
     @Override
     public boolean keyDown(int keycode) {
+        setDirection(keycode, true);
+        return true;
+    }
 
+    private void setDirection(int keycode, boolean ifPressed) {
         switch (keycode) {
             case Keys.W:
-                creature.changeVelocityY(creature.getSpeed());
+                creature.direction.setUpPressed(ifPressed);
                 break;
             case Keys.A:
-                creature.changeVelocityX(-creature.getSpeed());
+                creature.direction.setLeftPressed(ifPressed);
                 break;
             case Keys.S:
-                creature.changeVelocityY(-creature.getSpeed());
+                creature.direction.setDownPressed(ifPressed);
                 break;
             case Keys.D:
-                creature.changeVelocityX(creature.getSpeed());
+                creature.direction.setRightPressed(ifPressed);
                 break;
         }
-        return true;
     }
 
     @Override
     public boolean keyUp(int keycode) {
         Gdx.app.log(TAG, "up keycode = " + keycode);
-        switch (keycode) {
-            case Keys.W:
-                if (!Gdx.input.isKeyPressed(Keys.S)) {
-                    creature.resetVelocityY();
-                } else {
-                    creature.changeVelocityY(-creature.getSpeed());
-                }
-                break;
-
-            case Keys.S:
-                if (!Gdx.input.isKeyPressed(Keys.W)) {
-                    creature.resetVelocityY();
-                } else {
-                    creature.changeVelocityY(creature.getSpeed());
-                }
-                break;
-
-            case Keys.A:
-                if (!Gdx.input.isKeyPressed(Keys.D)) {
-                    creature.resetVelocityX();
-                } else {
-                    creature.changeVelocityX(creature.getSpeed());
-                }
-                break;
-
-            case Keys.D:
-                if (!Gdx.input.isKeyPressed(Keys.A)) {
-                    creature.resetVelocityX();
-                } else {
-                    creature.changeVelocityX(-creature.getSpeed());
-                }
-                break;
-        }
+        setDirection(keycode, false);
         return true;
     }
 

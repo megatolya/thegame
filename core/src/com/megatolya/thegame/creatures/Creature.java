@@ -1,15 +1,15 @@
 package com.megatolya.thegame.creatures;
 
+import java.util.HashMap;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.math.Vector2;
-
-import java.util.HashMap;
 
 
 public class Creature extends Sprite {
@@ -19,6 +19,61 @@ public class Creature extends Sprite {
     private HashMap<String, Sprite>  spritesMap;
 
     private final String TAG = "Creature";
+
+    public final Direction direction = new Direction();
+
+    public static class Direction {
+        private boolean downPressed = false;
+        private boolean upPressed = false;
+        private boolean leftPressed = false;
+        private boolean rightPressed = false;
+
+        public void setDownPressed(boolean downPressed) {
+            this.downPressed = downPressed;
+        }
+
+        public void setUpPressed(boolean upPressed) {
+            this.upPressed = upPressed;
+        }
+
+        public void setLeftPressed(boolean leftPressed) {
+            this.leftPressed = leftPressed;
+        }
+
+        public void setRightPressed(boolean rightPressed) {
+            this.rightPressed = rightPressed;
+        }
+
+        public Vector2 result() {
+            double y = 0;
+            double x = 0;
+
+            if (downPressed) {
+                y -= 1;
+            }
+
+            if (upPressed) {
+                y += 1;
+            }
+
+            if (leftPressed) {
+                x -= 1;
+            }
+
+            if (rightPressed) {
+                x += 1;
+            }
+
+            double norm = Math.sqrt(x * x + y * y);
+
+            if (Math.abs(norm) > 1e-5) {
+                x /= norm;
+                y /= norm;
+            }
+
+            return new Vector2((float) x, (float) y);
+        }
+    }
 
     public Creature(HashMap<String, Sprite> sprites, TiledMap m) {
         super(sprites.get("STOP"));
@@ -38,13 +93,15 @@ public class Creature extends Sprite {
     }
 
     public void update(float delta) {
-        if (velocity.y > speed) {
-            velocity.y = speed;
-        }
 
-        if (velocity.x > speed) {
-            velocity.x = speed;
-        }
+        Vector2 directionPressed = direction.result();
+
+        float rate = 0.3f;
+
+        velocity.y = (velocity.y + rate * speed * directionPressed.y) / (1 + rate);
+        velocity.x = (velocity.x + rate * speed * directionPressed.x) / (1 + rate);
+
+        System.out.println(velocity.y);
 
         // save old position
         float oldX = getX(), oldY = getY();
