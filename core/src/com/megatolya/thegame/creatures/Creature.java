@@ -112,8 +112,6 @@ public class Creature extends Sprite {
         // calculate the increment for step in #collidesLeft() and #collidesRight()
         TiledMapTileLayer mainLayer = (TiledMapTileLayer) map.getLayers().get(0);
         increment = (int) mainLayer.getTileWidth() / 2;
-        log("increment " + increment);
-        log("increment " + increment);
 
         if(velocity.x < 0) // going left
             collisionX = collidesLeft();
@@ -122,7 +120,6 @@ public class Creature extends Sprite {
 
         // react to x collision
         if(collisionX) {
-            log("collisionX ");
             setX(oldX);
         }
 
@@ -139,7 +136,6 @@ public class Creature extends Sprite {
 
         // react to y collision
         if(collisionY) {
-            log("collisionY ");
             setY(oldY);
         }
 
@@ -200,7 +196,7 @@ public class Creature extends Sprite {
     }
 
     public String getState() {
-        return (velocity.x != 0 || velocity.y != 0) ? "RUN" : "STOP";
+        return ((int) velocity.x != 0 || (int) velocity.y != 0) ? "RUN" : "STOP";
     }
 
     public boolean collidesBottom() {
@@ -220,13 +216,5 @@ public class Creature extends Sprite {
         TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get("background");
         Cell cell = layer.getCell((int) (x / layer.getTileWidth()), (int) (y / layer.getTileHeight()));
         return cell == null;
-    }
-
-
-    private void log(String msg) {
-        boolean SHOW_LOG = false;
-        if (SHOW_LOG) {
-            Gdx.app.log(TAG, msg);
-        }
     }
 }

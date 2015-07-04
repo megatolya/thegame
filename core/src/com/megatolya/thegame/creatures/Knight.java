@@ -1,6 +1,5 @@
 package com.megatolya.thegame.creatures;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -23,7 +22,7 @@ public class Knight extends Creature {
     }
 
     public void updatePicture(float delta) {
-        if (getState() == "STOP") {
+        if (getState().equals("STOP")) {
             return;
         }
 

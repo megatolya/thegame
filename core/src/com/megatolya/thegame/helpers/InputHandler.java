@@ -38,7 +38,6 @@ public class InputHandler implements InputProcessor{
 
     @Override
     public boolean keyUp(int keycode) {
-        Gdx.app.log(TAG, "up keycode = " + keycode);
         setDirection(keycode, false);
         return true;
     }
